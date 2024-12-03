@@ -12,6 +12,7 @@
 #include "trig.h"
 #include "qpn_port.h"
 #include "dspl_upd.h"
+
 static QEvent 1_lab2bQueue[30];
 
 QActiveCB const Q_ROM Q_ROM_VAR QF_active[]={
