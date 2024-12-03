@@ -7,6 +7,7 @@
 #include "bsp.h"
 #include "lab2b.h"
 #include "lcd.h"
+#include "displayer.h"
 #include <math.h>
 
 
@@ -23,6 +24,7 @@ int VolumeState = 0;
 int MainTextState = 0;
 int TextState = 0;
 int last_vol=0;
+volatile int d=0;
 /* Setup state machines */
 /**********************************************************************/
 static QState Lab2B_initial (Lab2B *me);
@@ -140,12 +142,13 @@ QState Lab2B_A(Lab2B *me) {
 		}
 		case B_U:{
 			xil_printf("upper button pressed\n");
-			DisplText("ECE");
+			update();
+			d+=1;
 			return Q_HANDLED();
 		}
 		case B_D:{
 			xil_printf("down button pressed\n");
-			DisplText("guys");
+			dspl_game_Init();
 			return Q_HANDLED();
 		}
 		case B_L:{
