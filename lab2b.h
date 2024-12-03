@@ -25,5 +25,6 @@ extern struct Lab2BTag l2b;
 void Lab2B_ctor(void);
 void GpioHandler(void *CallbackRef);
 void TwistHandler(void *CallbackRef);
+void SWHandler(void *CallbackRef);
 
 #endif  

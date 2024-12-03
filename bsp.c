@@ -1,9 +1,3 @@
-/*****************************************************************************
-* bsp.c for Lab2A of ECE 153a at UCSB
-* Date of the Last Update:  October 27,2019
-*****************************************************************************/
-
-/**/
 #include <stdio.h>
 #include <math.h>
 #include "qpn_port.h"
@@ -22,11 +16,6 @@
 #include "lcd.h"
 
 
-
-
-/*****************************/
-
-
 /* Define all variables and Gpio objects here  */
 //interrupt settings
 static XIntc sys_intc;
@@ -35,10 +24,11 @@ static XTmrCtr axiTimer;
 static XGpio dc;
 static XSpi spi;
 static XGpio btn;
-
+static XGpio sw;
 #define RESET_VALUE 0x5F5E100
 #define GPIO_CHANNEL1 1
 #define BUTTON_CHANNEL 1
+#define SW_CHANNEL 1
 
 unsigned int toggle = 1;
 static int encoder_count = 4;
@@ -93,10 +83,17 @@ void BSP_init(void) {
 
     /* ----- Initialize ENCODER GPIO ----- */
     XGpio_Initialize(&enc_gpio, XPAR_ENCODER_DEVICE_ID);
-    XIntc_Connect(&sys_intc, XPAR_MICROBLAZE_0_AXI_INTC_ENCODER_IP2INTC_IRPT_INTR, (Xil_ExceptionHandler)TwistHandler, &enc_gpio);
-    XIntc_Enable(&sys_intc, XPAR_MICROBLAZE_0_AXI_INTC_ENCODER_IP2INTC_IRPT_INTR);
+    XIntc_Connect(&sys_intc, XPAR_INTC_0_GPIO_0_VEC_ID, (Xil_ExceptionHandler)TwistHandler, &enc_gpio);
+    XIntc_Enable(&sys_intc, XPAR_INTC_0_GPIO_0_VEC_ID);
     XGpio_InterruptEnable(&enc_gpio, GPIO_CHANNEL1);
     XGpio_InterruptGlobalEnable(&enc_gpio);
+
+    /* ----- Initialize SW GPIO ----- */
+    XGpio_Initialize(&sw, XPAR_AXI_GPIO_SWITCH_DEVICE_ID);
+    XIntc_Connect(&sys_intc, XPAR_INTC_0_GPIO_3_VEC_ID, (Xil_ExceptionHandler)SWHandler, &sw);
+    XIntc_Enable(&sys_intc, XPAR_INTC_0_GPIO_3_VEC_ID);
+    XGpio_InterruptEnable(&sw, SW_CHANNEL);
+    XGpio_InterruptGlobalEnable(&sw);
 
     /* ----- Initialize Button GPIO ----- */
     XGpio_Initialize(&btn, XPAR_AXI_GPIO_BTN_DEVICE_ID);
@@ -214,6 +211,13 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     }
 }
 
+void SWHandler(void *CallbackRef) {
+	// Increment A counter
+	XGpio *GpioPtr = (XGpio *)CallbackRef;
+	XGpio_InterruptClear(GpioPtr, SW_CHANNEL);	// Clearing interrupt
+	Xuint32 ButtonPressStatus = 0;
+	ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+}
 
 void GpioHandler(void *CallbackRef) {
 	// Increment A counter
