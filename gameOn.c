@@ -36,9 +36,9 @@ QState GameOn_start(GemeOn *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             xil_printf("rendering init screen\n");
-            // 设置初始难度
+            // set init level
             changeLevel(currentLevel);
-            // 绘制初始界面
+            // plot init frame(choose level and start game)
             initScreenPlot();
             return Q_HANDLED();
         }
@@ -99,7 +99,7 @@ QState GameUpdate(GemeOn *me) {
 			return Q_HANDLED();
 		}
         case ChangeStatus: {
-            //预留的一个状态，可以往里加球裂变、随机障碍等功能
+            // preserved state, can be adding balls random obstacle
             return Q_HANDLED();
         }
     }
@@ -123,52 +123,52 @@ int changeLevel(int level){
     // set level parameter and other stuff
 }
 
-// 绘制初始界面 
+// plot init frame (choose level and start game)
 void initScreenPlot(int level){
     // plot screen
 }
 
-// 设置小球初始位置
+// set ball's init position
 void setBallInitPosition(){
     //
 }
 
-// 计算新的位置
+//calculate next position
 void calculateNewPosition(){
 
 }
 
-// 画出现在的小球位置
+// plot ball's new position
 void changePosition(){
 
 }
 
-// 计算是否击中边缘
+// calculate if hit the boarder
 int calculateHit(){
 
 }
 
-// 根据switch绘制底部反弹板
+// plot reflect boards in the bottom according to the position switch
 int plotBoards(){
 
 }
 
-// 计算反弹后的斜率
+//calculate new direction after reflection
 void calculateDirection(){
 
 }
 
-// 计算是否结束游戏
+// calculate if the game is over 
 int calculateIsOver(){
 
 }
             
-// 计算当前得分
+//calculate if scored
 void updateScore(){
 
 }
 
-// 画出结束画面
+// display game over
 void displayEnd(){
 
 }

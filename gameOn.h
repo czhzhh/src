@@ -6,7 +6,6 @@
 
 
 enum GemeOnSignals {
-    // 上下按钮调节难度，中间按钮确认游戏开始
     GameOn,
     ChangeLevelUp,
     ChangeLevelDown,
