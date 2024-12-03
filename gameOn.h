@@ -6,6 +6,7 @@
 
 
 enum GemeOnSignals {
+	TICK_SIG,
     GameOn,
     ChangeLevelUp,
     ChangeLevelDown,
