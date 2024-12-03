@@ -11,32 +11,33 @@
 
 typedef struct GameOnTag  {               //Lab2B State machine
 	QActive super;
-} GemeOn;
+} FinalSM;
 
 int currentLevel = 0;
 
-static QState GameOn_initial (GemeOn *me);
-static QState GameOn_start (GemeOn *me);
-static QState GameRunning (GemeOn *me);
-static QState GameUpdate (GemeOn *me);
-static QState GameOver (GemeOn *me);
+static QState fsm_initial (FinalSM *me);
+static QState fsm_game (FinalSM *me);
+static QState fsm_on_start (FinalSM *me);
+static QState fsm_running (FinalSM *me);
+static QState fsm_update (FinalSM *me);
+static QState fsm_over (FinalSM *me);
 // static QState GameOn_on      (gemeOn *me);
 // static QState Lab2B_A  (gemeOn *me);
 // static QState Lab2B_B  (gemeOn *me);
 
-GemeOn newGame;
+FinalSM newGame;
 
-void GemeOn_ctor(void)  {
-	GemeOn *me = &newGame;
-	QActive_ctor(&me->super, (QStateHandler)&GameOn_initial);
+void fsm_ctor(void)  {
+	FinalSM *me = &newGame;
+	QActive_ctor(&me->super, (QStateHandler)&fsm_initial);
 }
 
-QState GameOn_initial(GemeOn *me) {
+QState fsm_initial(FinalSM *me) {
     xil_printf("\n\rInitialization");
-    return Q_TRAN(&GameOn_start);
+    return Q_TRAN(&fsm_on_start);
 }
 
-QState GameOn_start(GemeOn *me) {
+QState fsm_on_start(FinalSM *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             xil_printf("rendering init screen\n");
@@ -63,13 +64,13 @@ QState GameOn_start(GemeOn *me) {
         case GameOn: {
             xil_printf("game on\n");
             setBallInitPosition();
-            return Q_TRAN(&GameRunning);
+            return Q_TRAN(&fsm_running);
         }
     }
     return Q_SUPER(&QHsm_top);
 }
 
-QState GameRunning(GemeOn *me) {
+QState fsm_running(FinalSM *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
 			return Q_HANDLED();
@@ -78,7 +79,7 @@ QState GameRunning(GemeOn *me) {
 			calculateNewPosition();
             changePosition();
             if(calculateHit()){
-                return Q_TRAN(&GameUpdate);
+                return Q_TRAN(&fsm_update);
             }
 			return Q_HANDLED();
 		}
@@ -90,15 +91,15 @@ QState GameRunning(GemeOn *me) {
     return Q_SUPER(&QHsm_top);
 }
 
-QState GameUpdate(GemeOn *me) {
+QState fsm_update(FinalSM *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             calculateDirection();
             if(calculateIsOver()){
                 updateScore();
-                return Q_TRAN(&GameRunning);
+                return Q_TRAN(&fsm_running);
             }else{
-                return Q_TRAN(&GameOver);
+                return Q_TRAN(&fsm_over);
             }
 			return Q_HANDLED();
 		}
@@ -110,14 +111,14 @@ QState GameUpdate(GemeOn *me) {
     return Q_SUPER(&QHsm_top);
 }
 
-QState GameOver(GemeOn *me) {
+QState fsm_over(FinalSM *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             displayEnd();
             return Q_HANDLED();
         }
         case GameOn: {
-            return Q_TRAN(&GameOn_start);
+            return Q_TRAN(&fsm_on_start);
         }
     }
     return Q_SUPER(&QHsm_top);
