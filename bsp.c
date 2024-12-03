@@ -63,7 +63,7 @@ static enum STATES {
 // 初始化数组，计算每行的像素点数量
 
 void BSP_init(void) {
-	init_ball_pixel_counts();
+	Init_game();
     XSpi_Config *spiConfig;  /* Pointer to Configuration data */
     u32 controlReg;
 
@@ -164,15 +164,7 @@ void SWHandler(void *CallbackRef) {
     ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
     int positions[valid_sw];
     int count = analyzeBits(ButtonPressStatus, valid_sw, positions);
-    if (count == 0) {
-            xil_printf("Invalid\n\r");
-        } else {
-            xil_printf("Valid: %d positions: ", count);
-            for (int i = 0; i < count; i++) {
-                xil_printf("%d ", positions[i]);
-            }
-            xil_printf("\n\r");
-        }
+    //QActive_postISR((QActive *)&l2b, BoardsChange);
 }
 
 void GpioHandler(void *CallbackRef) {

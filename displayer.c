@@ -16,7 +16,22 @@
 #include "lcd.h"
 
 #define MAX_RADIUS 20
+#define BRICKS_COUNT 16
+#define BRICK_HEIGHT 18
+#define BRICK_GAP 1
+#define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP) // 每砖块占用的总高度
+#define BRICK_WIDTH 8
+
+int Brck_Pos[BRICKS_COUNT][4];
 int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
+int former_position;
+int former_x=0;
+int former_y=0;
+extern int d;
+void Init_game(){
+	init_ball_pixel_counts();
+	Init_Bricks();
+}
 void init_ball_pixel_counts() {
 	for (int r = 1; r <= MAX_RADIUS; r++) {
 	        for (int dy = -r; dy <= r; dy++) {
@@ -37,12 +52,14 @@ void init_ball_pixel_counts() {
 
 void draw_ball(int x, int y, int r) {
 	if (r < 1 || r > MAX_RADIUS) return; // 检查半径是否有效
-
+	setColor(138, 43, 226);
 	    for (int dy = -r; dy <= r; dy++) {
 	        int dx_count = ball_pixel_counts[r][dy + r]; // 获取预计算的像素点数量
 	        int x_start = x - (dx_count / 2); // 计算水平起始点
 	        drawHLine(x_start, y + dy, dx_count); // 绘制水平线
 	    }
+	    former_x=x;
+	    former_y=y;
 }
 
 void DrawBorder() {
@@ -53,7 +70,6 @@ void DrawBorder() {
 		drawVLine(DISP_X_SIZE-width, 0, DISP_Y_SIZE);
 	}
 }
-
 void Set_Blue(){
 	for (int Row = 0; Row<8; Row++) {
 		int NewRow = Row*40;
@@ -103,3 +119,91 @@ void Txt_Set_BLUE(void) {
 		}
 	}
 }
+void dspl_init(){
+	/*
+	 * Game start
+	 * Settings
+	 *
+	 * */
+}
+void dspl_Settings(){
+	/*
+	 * Difficulty(Velocity)
+	 * Bullet Size
+	 * Number of Bouncers
+	 *
+	 * */
+}
+void dspl_game_Init(){
+	setColor(34, 139, 34);
+	fillRect(0,0,239,319);
+}
+void erase_former(int former_x,int former_y,int r){
+	/*SHOULD USE ERASER BEFORE UPDATE
+	 * erase last ball
+	 * erase last score
+	 * */
+	setColor(34, 139, 34);
+	for (int dy = -r; dy <= r; dy++) {
+	    int dx_count = ball_pixel_counts[r][dy + r]; // 获取预计算的像素点数量
+	    int x_start = former_x - (dx_count / 2); // 计算水平起始点
+	    drawHLine(x_start, former_y + dy, dx_count); // 绘制水平线
+	}
+}
+void Init_Bricks(void) {
+    int x1 = 1;
+    int x2 = x1 + BRICK_WIDTH - 1;
+
+    for (int i = 0; i < BRICKS_COUNT; i++) {
+        int y1 = i * BRICK_TOTAL_HEIGHT + BRICK_GAP;
+        int y2 = y1 + BRICK_HEIGHT - 1;
+
+        Brck_Pos[i][0] = x1;
+        Brck_Pos[i][1] = y1;
+        Brck_Pos[i][2] = x2;
+        Brck_Pos[i][3] = y2;
+    }
+}
+void Bricks(int count, int *positions){
+	if (count==0){fillRect(0,0,7,319);}
+		else{
+			for (int i = 0; i < count; i++) {
+				int index = positions[i];
+				int x1 = Brck_Pos[index][0];
+				int y1 = Brck_Pos[index][1];
+				int x2 = Brck_Pos[index][2];
+				int y2 = Brck_Pos[index][3];
+				fillRect(x1, y1, x2, y2);
+			}
+		}
+	former_position=positions;
+}
+void Score(){
+
+}
+
+void update(){
+	erase_former(former_x,former_y,8);
+	draw_ball(120+d,130+d,8);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
