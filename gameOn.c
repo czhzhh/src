@@ -5,7 +5,7 @@
 
 #include "qpn_port.h"
 #include "bsp.h"
-#include "gemeOn.h"
+#include "gameOn.h"
 #include "lcd.h"
 #include <math.h>
 
@@ -16,6 +16,10 @@ typedef struct GameOnTag  {               //Lab2B State machine
 int currentLevel = 0;
 
 static QState GameOn_initial (GemeOn *me);
+static QState GameOn_start (GemeOn *me);
+static QState GameRunning (GemeOn *me);
+static QState GameUpdate (GemeOn *me);
+static QState GameOver (GemeOn *me);
 // static QState GameOn_on      (gemeOn *me);
 // static QState Lab2B_A  (gemeOn *me);
 // static QState Lab2B_B  (gemeOn *me);
@@ -24,10 +28,10 @@ GemeOn newGame;
 
 void GemeOn_ctor(void)  {
 	GemeOn *me = &newGame;
-	QActive_ctor(&me->super, (QStateHandler)&GemeOn_initial);
+	QActive_ctor(&me->super, (QStateHandler)&GameOn_initial);
 }
 
-QState GemeOn_initial(GemeOn *me) {
+QState GameOn_initial(GemeOn *me) {
     xil_printf("\n\rInitialization");
     return Q_TRAN(&GameOn_start);
 }
@@ -110,6 +114,7 @@ QState GameOver(GemeOn *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             displayEnd();
+            return Q_HANDLED();
         }
         case GameOn: {
             return Q_TRAN(&GameOn_start);
