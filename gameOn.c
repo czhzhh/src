@@ -9,8 +9,8 @@
 #include "lcd.h"
 #include <math.h>
 
-typedef struct GameOnTag  {               //Lab2B State machine
-	QActive super;
+typedef struct QHsmTstTag {
+	QHsm super;  
 } FinalSM;
 
 int currentLevel = 0;
@@ -28,13 +28,30 @@ static QState fsm_over (FinalSM *me);
 FinalSM newGame;
 
 void fsm_ctor(void)  {
-	FinalSM *me = &newGame;
-	QActive_ctor(&me->super, (QStateHandler)&fsm_initial);
+	FinsalSM *me = &newGame;
+    QHsm_ctor(&me.super, (QStateHandler)&fsm_initial);
 }
 
 QState fsm_initial(FinalSM *me) {
     xil_printf("\n\rInitialization");
     return Q_TRAN(&fsm_on_start);
+}
+
+QState fsm_game(FinalSM *me) {
+    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+            return Q_HANDLED();
+        }
+        case TICK_SIG: 
+        case GameOn: 
+        case ChangeLevelUp:
+        case ChangeLevelDown:
+        case BoardsChange:
+        case ChangeStatus: {
+            return Q_TRAN(&fsm_on_start);
+        }
+    }
+    return Q_SUPER(&QHsm_top);
 }
 
 QState fsm_on_start(FinalSM *me) {
@@ -45,6 +62,9 @@ QState fsm_on_start(FinalSM *me) {
             changeLevel(currentLevel);
             // plot init frame(choose level and start game)
             initScreenPlot();
+            return Q_HANDLED();
+        }
+        case TICK_SIG: {
             return Q_HANDLED();
         }
         case ChangeLevelUp: {
@@ -66,8 +86,14 @@ QState fsm_on_start(FinalSM *me) {
             setBallInitPosition();
             return Q_TRAN(&fsm_running);
         }
+        case BoardsChange: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
     }
-    return Q_SUPER(&QHsm_top);
+    return Q_SUPER(&fsm_game);
 }
 
 QState fsm_running(FinalSM *me) {
@@ -87,8 +113,20 @@ QState fsm_running(FinalSM *me) {
             plotBoards();
             return Q_HANDLED();
         }
+        case GameOn: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
     }
-    return Q_SUPER(&QHsm_top);
+    return Q_SUPER(&fsm_game);
 }
 
 QState fsm_update(FinalSM *me) {
@@ -107,8 +145,23 @@ QState fsm_update(FinalSM *me) {
             // preserved state, can be adding balls random obstacle
             return Q_HANDLED();
         }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
     }
-    return Q_SUPER(&QHsm_top);
+    return Q_SUPER(&fsm_game);
 }
 
 QState fsm_over(FinalSM *me) {
@@ -120,8 +173,23 @@ QState fsm_over(FinalSM *me) {
         case GameOn: {
             return Q_TRAN(&fsm_on_start);
         }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case BoardsChange: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
     }
-    return Q_SUPER(&QHsm_top);
+    return Q_SUPER(&fsm_game);
 }
 
 // set level 0 easy, 1 medium, 2 difficult
