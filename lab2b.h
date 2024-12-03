@@ -26,5 +26,8 @@ void Lab2B_ctor(void);
 void GpioHandler(void *CallbackRef);
 void TwistHandler(void *CallbackRef);
 void SWHandler(void *CallbackRef);
+void Tmr_Cter_Hdler(void *CallbackRef);
+void init_ball_pixel_counts();
+void draw_ball(int x, int y, int r);
 
 #endif  

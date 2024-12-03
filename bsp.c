@@ -1,3 +1,9 @@
+/*****************************************************************************
+* bsp.c for Lab2A of ECE 153a at UCSB
+* Date of the Last Update:  October 27,2019
+*****************************************************************************/
+
+/**/
 #include <stdio.h>
 #include <math.h>
 #include "qpn_port.h"
@@ -16,6 +22,11 @@
 #include "lcd.h"
 
 
+
+
+/*****************************/
+
+
 /* Define all variables and Gpio objects here  */
 //interrupt settings
 static XIntc sys_intc;
@@ -25,6 +36,7 @@ static XGpio dc;
 static XSpi spi;
 static XGpio btn;
 static XGpio sw;
+
 #define RESET_VALUE 0x5F5E100
 #define GPIO_CHANNEL1 1
 #define BUTTON_CHANNEL 1
@@ -37,44 +49,39 @@ volatile int timer_state=0;
 int VolumeTimeOut = 0;
 int TextTimeOut = 0;
 static Xuint16 state = 0b11;
+int valid_sw = 5;
+
 static enum STATES {
 		S0 = 0b11,
 		S1 = 0b01,
 		S2 = 0b00,
 		S3 = 0b10
 };
+#define MAX_RADIUS 20
 
+// 用于存储不同半径的球每行的像素点数量
+int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
 
-void Tmr_Cter_Hdler(void *CallbackRef){
-	if(MainVolumeState==1){
-		if (VolumeState == 1) {
-		setColor(0,255,00);
-		fillRect(70, 90, act_volume+70, 110);
-		VolumeTimeOut = 0;
-		VolumeState = 0;
-	}
-	if(VolumeTimeOut>3069){
-		printf("time out vol\n");
-		Tmr_Set_Blue();
-		MainVolumeState=0;
-	}
-		VolumeTimeOut++;}
+// 初始化数组，计算每行的像素点数量
+void init_ball_pixel_counts() {
+	for (int r = 1; r <= MAX_RADIUS; r++) {
+	        for (int dy = -r; dy <= r; dy++) {
+	            int dx_limit_squared = r * r - dy * dy;
+	            int dx_limit = 0;
 
-	if(MainTextState==1){
-		if(TextState==1){
-			TextTimeOut=0;
-			TextState=0;
-		}
-		if(TextTimeOut>3069){
-			printf("time out txt\n");
-			Txt_Set_BLUE();
-			MainTextState=0;
-		}
-		TextTimeOut++;
-	}
+	            // 计算水平范围，避免浮点运算
+	            while (dx_limit * dx_limit <= dx_limit_squared) {
+	                dx_limit++;
+	            }
+	            dx_limit--; // 回退一步，找到最大的有效整数 dx_limit
+
+	            // 存储像素点数量（每行总长度）
+	            ball_pixel_counts[r][dy + r] = 2 * dx_limit + 1;
+	        }
+	    }
 }
 void BSP_init(void) {
-
+	init_ball_pixel_counts();
     XSpi_Config *spiConfig;  /* Pointer to Configuration data */
     u32 controlReg;
 
@@ -89,9 +96,9 @@ void BSP_init(void) {
     XGpio_InterruptGlobalEnable(&enc_gpio);
 
     /* ----- Initialize SW GPIO ----- */
-    XGpio_Initialize(&sw, XPAR_AXI_GPIO_SWITCH_DEVICE_ID);
-    XIntc_Connect(&sys_intc, XPAR_INTC_0_GPIO_3_VEC_ID, (Xil_ExceptionHandler)SWHandler, &sw);
-    XIntc_Enable(&sys_intc, XPAR_INTC_0_GPIO_3_VEC_ID);
+    XGpio_Initialize(&sw, XPAR_SWITCH_DEVICE_ID);
+    XIntc_Connect(&sys_intc, XPAR_INTC_0_GPIO_5_VEC_ID, (Xil_ExceptionHandler)SWHandler, &sw);
+    XIntc_Enable(&sys_intc, XPAR_INTC_0_GPIO_5_VEC_ID);
     XGpio_InterruptEnable(&sw, SW_CHANNEL);
     XGpio_InterruptGlobalEnable(&sw);
 
@@ -211,12 +218,46 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     }
 }
 
+int analyzeBits(uint32_t value, int valid_sw, int *positions) {
+    int count = 0; // 统计被置1的位数
+    for (int i = 15; i >= 0 && count <= valid_sw; i--) {
+        if (value & (1 << i)) { // 如果第 i 位为 1
+            if (count < valid_sw) {
+                positions[count] = i + 1; // 记录位置，从 1 开始计数
+            }
+            count++;
+        }
+    }
+    return (count > valid_sw) ? 0 : count;
+}
+
 void SWHandler(void *CallbackRef) {
-	// Increment A counter
-	XGpio *GpioPtr = (XGpio *)CallbackRef;
-	XGpio_InterruptClear(GpioPtr, SW_CHANNEL);	// Clearing interrupt
-	Xuint32 ButtonPressStatus = 0;
-	ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+    // Increment A counter
+    XGpio *GpioPtr = (XGpio *)CallbackRef;
+    XGpio_InterruptClear(GpioPtr, SW_CHANNEL); // 清除中断
+    Xuint32 ButtonPressStatus = 0;
+    ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+    int positions[valid_sw];
+    int count = analyzeBits(ButtonPressStatus, valid_sw, positions);
+    if (count == 0) {
+            xil_printf("Invalid\n\r");
+        } else {
+            xil_printf("Valid: %d positions: ", count);
+            for (int i = 0; i < count; i++) {
+                xil_printf("%d ", positions[i]);
+            }
+            xil_printf("\n\r");
+        }
+}
+
+void draw_ball(int x, int y, int r) {
+	if (r < 1 || r > MAX_RADIUS) return; // 检查半径是否有效
+
+	    for (int dy = -r; dy <= r; dy++) {
+	        int dx_count = ball_pixel_counts[r][dy + r]; // 获取预计算的像素点数量
+	        int x_start = x - (dx_count / 2); // 计算水平起始点
+	        drawHLine(x_start, y + dy, dx_count); // 绘制水平线
+	    }
 }
 
 void GpioHandler(void *CallbackRef) {
@@ -325,8 +366,31 @@ void TwistHandler(void *CallbackRef) {
 			break;}
 	XGpio_InterruptClear(GpioPtr, GPIO_CHANNEL1);
 }
+void Tmr_Cter_Hdler(void *CallbackRef){
+	if(MainVolumeState==1){
+		if (VolumeState == 1) {
+		setColor(0,255,00);
+		fillRect(70, 90, act_volume+70, 110);
+		VolumeTimeOut = 0;
+		VolumeState = 0;
+	}
+	if(VolumeTimeOut>3069){
+		printf("time out vol\n");
+		Tmr_Set_Blue();
+		MainVolumeState=0;
+	}
+		VolumeTimeOut++;}
 
-void debounceInterrupt() {
-	QActive_postISR((QActive *)&l2b, ENC_PRS);
-	// XGpio_InterruptClear(&sw_Gpio, GPIO_CHANNEL1); // (Example, need to fill in your own parameters
+	if(MainTextState==1){
+		if(TextState==1){
+			TextTimeOut=0;
+			TextState=0;
+		}
+		if(TextTimeOut>3069){
+			printf("time out txt\n");
+			Txt_Set_BLUE();
+			MainTextState=0;
+		}
+		TextTimeOut++;
+	}
 }
