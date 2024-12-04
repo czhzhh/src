@@ -153,7 +153,8 @@ QState Lab2B_A(Lab2B *me) {
 		}
 		case B_L:{
 			xil_printf("left button pressed\n");
-			DisplText("have");
+			Bricks(count, positions);
+			free_positions();
 			return Q_HANDLED();
 		}
 		case B_R:{

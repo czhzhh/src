@@ -5,6 +5,7 @@
 
 /**/
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "qpn_port.h"
 #include "bsp.h"
@@ -45,12 +46,14 @@ static XGpio sw;
 
 unsigned int toggle = 1;
 static int encoder_count = 4;
-volatile int count = 0;
+int count = 0;
 volatile int timer_state=0;
 int VolumeTimeOut = 0;
 int TextTimeOut = 0;
 static Xuint16 state = 0b11;
-int valid_sw = 5;
+int *positions = NULL; // 动态分配的数组
+int valid_sw = 0;      // 初始化为 0
+
 
 static enum STATES {
 		S0 = 0b11,
@@ -142,28 +145,46 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
     }
 }
 
+void init_positions(int size) {
+    if (positions != NULL) {
+        free(positions); // 如果已经分配内存，先释放
+    }
+    valid_sw = size; // 更新最大开关数量
+    positions = (int *)malloc(valid_sw * sizeof(int));
+}
+
+void free_positions(void) {
+    if (positions != NULL) {
+        free(positions); // 释放内存
+        positions = NULL;
+        valid_sw = 0;   // 重置 valid_sw
+    }
+}
+
 int analyzeBits(uint32_t value, int valid_sw, int *positions) {
-    int count = 0; // 统计被置1的位数
-    for (int i = 15; i >= 0 && count <= valid_sw; i--) {
-        if (value & (1 << i)) { // 如果第 i 位为 1
+    int count = 0;
+    for (int i = 0; i < 16; i++) {
+        if (value & (1 << i)) {
             if (count < valid_sw) {
-                positions[count] = i + 1; // 记录位置，从 1 开始计数
+                positions[count++] = 15 - i;
+            } else {
+                memset(positions, 0, valid_sw * sizeof(int));
+                return 0;
             }
-            count++;
         }
     }
-    return (count > valid_sw) ? 0 : count;
+    return count;
 }
+
 
 
 void SWHandler(void *CallbackRef) {
     // Increment A counter
     XGpio *GpioPtr = (XGpio *)CallbackRef;
     XGpio_InterruptClear(GpioPtr, SW_CHANNEL); // 清除中断
-    Xuint32 ButtonPressStatus = 0;
-    ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
-    int positions[valid_sw];
-    int count = analyzeBits(ButtonPressStatus, valid_sw, positions);
+    Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+    init_positions(5);
+    count = analyzeBits(ButtonPressStatus, valid_sw, positions);
     //QActive_postISR((QActive *)&l2b, BoardsChange);
 }
 
