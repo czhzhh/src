@@ -24,7 +24,6 @@
 
 int Brck_Pos[BRICKS_COUNT][4];
 int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
-int former_position;
 int former_x=0;
 int former_y=0;
 extern int d;
@@ -165,8 +164,9 @@ void Init_Bricks(void) {
     }
 }
 void Bricks(int count, int *positions){
-	if (count==0){fillRect(0,0,7,319);}
+	if (count==0){setColor(34, 139, 34);fillRect(0,0,8,319);}
 		else{
+			setColor(255,0,0);
 			for (int i = 0; i < count; i++) {
 				int index = positions[i];
 				int x1 = Brck_Pos[index][0];
@@ -176,7 +176,6 @@ void Bricks(int count, int *positions){
 				fillRect(x1, y1, x2, y2);
 			}
 		}
-	former_position=positions;
 }
 void Score(){
 
