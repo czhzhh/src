@@ -29,10 +29,10 @@ enum Lab2BSignals {
 extern struct Lab2BTag l2b;
 
 void Lab2B_ctor(void);
-// void GpioHandler(void *CallbackRef);
-// void TwistHandler(void *CallbackRef);
-// void SWHandler(void *CallbackRef);
-// void Tmr_Cter_Hdler(void *CallbackRef);
-// void draw_ball(int x, int y, int r);
+ void GpioHandler(void *CallbackRef);
+ void TwistHandler(void *CallbackRef);
+ void SWHandler(void *CallbackRef);
+ void Tmr_Cter_Hdler(void *CallbackRef);
+ void draw_ball(int x, int y, int r);
 
 #endif  
