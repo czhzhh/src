@@ -28,13 +28,16 @@ typedef struct Lab2BTag  {               //Lab2B State machine
  volatile int d=0;
 
 int currentLevel = 0;
+int currentMode = 0;
+int initPlotVar = 0;
+int setChangeFlag = 0;
 
 static QState fsm_initial (Lab2B *me);
-// static QState fsm_game (Lab2B *me);
 static QState fsm_on_start (Lab2B *me);
-static QState fsm_running (Lab2B *me);
-static QState fsm_update (Lab2B *me);
+static QState fsm_SW (Lab2B *me);
+static QState fsm_Btn (Lab2B *me);
 static QState fsm_over (Lab2B *me);
+static QState fsm_Setting (Lab2B *me);
 /**********************************************************************/
 Lab2B l2b;
 
@@ -56,6 +59,7 @@ QState fsm_on_start(Lab2B *me) {
             xil_printf("rendering init screen fsm_on_start\n\r");
             // set init level
             changeLevel(currentLevel);
+            setMode(currentMode);
             // plot init frame(choose level and start game)
             initScreenPlot();
             return Q_HANDLED();
@@ -65,22 +69,31 @@ QState fsm_on_start(Lab2B *me) {
         }
         case ChangeLevelUp: {
             xil_printf("change mode up\n\r");
-            currentLevel = (currentLevel == 2) ? 0 : currentLevel + 1;
-            changeLevel(currentLevel);
+            initPlotVar = (initPlotVar == 1) ? 0 : initPlotVar + 1;
             initScreenPlot();
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
             xil_printf("change mode down\n\r");
-            currentLevel = (currentLevel == 0) ? 2 : currentLevel - 1;
-            changeLevel(currentLevel);
+            // currentLevel = (currentLevel == 0) ? 2 : currentLevel - 1;
+            // changeLevel(currentLevel);
+            initPlotVar = (initPlotVar == 1) ? 0 : initPlotVar + 1;
             initScreenPlot();
             return Q_HANDLED();
         }
         case GameOn: {
             xil_printf("game on\n\r");
-            setBallInitPosition();
-            return Q_TRAN(&fsm_running);
+            //setBallInitPosition();
+            if(initPlotVar == 0){
+                if(currentMode){
+                    return Q_TRAN(&fsm_SW);
+                }else{
+                    return Q_TRAN(&fsm_Btn);
+                }
+            }else{
+                return Q_TRAN(&fsm_Setting);
+            }
+            return Q_HANDLED();
         }
         case BoardsChange: {
             return Q_HANDLED();
@@ -88,81 +101,83 @@ QState fsm_on_start(Lab2B *me) {
         case ChangeStatus: {
             return Q_HANDLED();
         }
+        case B_L: {
+			return Q_HANDLED();
+		}
+        case B_R: {
+			return Q_HANDLED();
+		}
     }
 	return Q_SUPER(&QHsm_top);
 }
-// void Vol_up(){
-// 	printf("Volume: %d\n",act_volume);
-// 	setColor(0, 0, 0);
-// 	fillRect(act_volume+70, 90, 170, 110);
-// 	setColorBg(255, 0, 0);
-// 	fillRect(act_volume+69, 90, act_volume+70, 110);
-// 	MainVolumeState=1;
-// 	VolumeState=1;
-// }
-// void Vol_down(){
-// 	printf("Volume: %d\n",act_volume);
-// 	setColor(0, 0, 0);
-// 	fillRect(act_volume+71, 90, 170, 110);
-// 	setColor(0, 0, 0);
-// 	fillRect(act_volume+70, 90, act_volume+71, 110);
-// 	MainVolumeState = 1;
-// 	VolumeState = 1;
-// }
 
-// void VolumeToggle(int toggle) {
-// 	if (toggle == 1) {
-// 		last_vol=act_volume;
-// 		act_volume=0;
-// 		setColor(0, 0, 0);
-// 		fillRect(70, 90, 170, 110);
-// 		MainVolumeState = 1;
-// 		VolumeState = 1;
-// 	} 
-// 	else {
-// 		act_volume=last_vol;
-// 		setColor(0, 255, 0);
-// 		fillRect(69, 90, 70+act_volume, 110);
-// 		setColor(0, 0, 0);
-// 		fillRect(act_volume+71, 90, 170, 110);
-// 		MainVolumeState=1;
-// 		VolumeState=1;
-// 	}
-// }
-// void DisplText(char* s1) {
-// 	Txt_Set_BLUE(); 
-// 	setColor(255, 191, 50);
-// 	setColorBg(255, 255, 255);
-// 	setFont(BigFont);
-// 	lcdPrint(s1, 75, 140);
-// 	MainTextState = 1;
-// 	TextState = 1;
-// }
-/* Create Lab2B_on state and do any initialization code if needed */
-/******************************************************************/
-QState fsm_running(Lab2B *me) {
-	    switch (Q_SIG(me)) {
+QState fsm_Setting(Lab2B *me) {
+    switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-        	xil_printf("fsm_running\n\r");
+            xil_printf("Into settinhg\n\r");
+            // set init level
+            dspl_Settings();
+            return Q_HANDLED();
+        }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            xil_printf("change mode up\n\r");
+            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag + 1;
+            // plot the arrow
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            xil_printf("change mode down\n\r");
+            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag - 1;
+            // plot the arrow
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            xil_printf("back to begining\n\r");
+            return Q_TRAN(&fsm_on_start);
+        }
+        case B_L: {
+            // change paras according to setChangeFlag
 			return Q_HANDLED();
 		}
-        case TICK_SIG: {
-			calculateNewPosition();
-            changePosition();
-            if(calculateHit()){
-            	xil_printf("do_update\n\r");
-				calculateDirection();
-				if(calculateIsOver()){
-					updateScore();
-				}else{
-					xil_printf("do_update over\n\r");
-					return Q_TRAN(&fsm_over);
-				}
-            }
+        case B_R: {
+            // change paras according to setChangeFlag
 			return Q_HANDLED();
 		}
         case BoardsChange: {
-            plotBoards();
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+    }
+	return Q_SUPER(&fsm_on_start);
+}
+
+QState fsm_SW(Lab2B *me) {
+	    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+        	xil_printf("fsm_SW\n\r");
+			return Q_HANDLED();
+		}
+        case TICK_SIG: {
+			// calculateNewPosition();
+            // changePosition();
+            update();
+            // int gameover
+            // if(gameover){
+            // 	xil_printf("game over\n\r");
+			// 	return Q_TRAN(&fsm_over);
+
+            // }
+			return Q_HANDLED();
+		}
+        case BoardsChange: {
+            Bricks(count,positions);
+            free_positions();
+            // plotBoards();
             return Q_HANDLED();
         }
         case GameOn: {
@@ -170,11 +185,66 @@ QState fsm_running(Lab2B *me) {
         }
         case ChangeLevelUp: {
         	// delate this later
-        	xil_printf("running to over\n\r");
-        	update();
-        	d+=1;
-        	return Q_TRAN(&fsm_over);
-            //return Q_HANDLED();
+        	// update();
+        	// d+=1;
+        	// return Q_TRAN(&fsm_over);
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+        	xil_printf("down button pressed\n");
+        	//dspl_game_Init();
+            return Q_HANDLED();
+        }
+        case B_L: {
+			//Bricks(count, positions);
+			//free_positions();
+        	//btn_mov_l();
+			return Q_HANDLED();
+		}
+        case B_R: {
+			//btn_mov_r();
+			return Q_HANDLED();
+		}
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+    }
+    return Q_SUPER(&fsm_on_start);
+}
+
+QState fsm_Btn(Lab2B *me) {
+	    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+        	xil_printf("fsm_Btn\n\r");
+			return Q_HANDLED();
+		}
+        case TICK_SIG: {
+			// calculateNewPosition();
+            // changePosition();
+            update();
+            // int gameover
+            // if(gameover){
+            // 	xil_printf("game over\n\r");
+			// 	return Q_TRAN(&fsm_over);
+
+            // }
+			return Q_HANDLED();
+		}
+        case BoardsChange: {
+            //Bricks(count,positions);
+            //free_positions();
+            // plotBoards();
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+        	// delate this later
+        	// update();
+        	// d+=1;
+        	// return Q_TRAN(&fsm_over);
+            return Q_HANDLED();
         }
         case ChangeLevelDown: {
         	xil_printf("down button pressed\n");
@@ -197,49 +267,7 @@ QState fsm_running(Lab2B *me) {
     }
     return Q_SUPER(&fsm_on_start);
 }
-/*
-QState fsm_update(Lab2B *me) {
-    switch (Q_SIG(me)) {
-        case Q_ENTRY_SIG: {
-        	xil_printf("fsm_update\n\r");
-            calculateDirection();
-            if(calculateIsOver()){
-                updateScore();
-                xil_printf("fsm_update 1\n\r");
-                return Q_TRAN(&fsm_running);
-            }else{
-            	xil_printf("fsm_updatem 2\n\r");
-                return Q_TRAN(&fsm_over);
-            }
-			return Q_HANDLED();
-		}
-        case ChangeStatus: {
-            // preserved state, can be adding balls random obstacle
-            return Q_HANDLED();
-        }
-        case BoardsChange: {
-            plotBoards();
-            return Q_HANDLED();
-        }
-        case TICK_SIG: {
-            return Q_HANDLED();
-        }
-        case GameOn: {
-            return Q_HANDLED();
-        }
-        case ChangeLevelUp: {
-        	// delate this later
-        	xil_printf("ChangeLevelUp in fsm_update\n\r");
-        	return Q_TRAN(&fsm_over);
-        	//return Q_HANDLED();
-        }
-        case ChangeLevelDown: {
-            return Q_HANDLED();
-        }
-    }
-    return Q_SUPER(&fsm_on_start);
-}
-*/
+
 QState fsm_over(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
@@ -271,12 +299,23 @@ QState fsm_over(Lab2B *me) {
         case ChangeStatus: {
             return Q_HANDLED();
         }
+        case B_L: {
+			return Q_HANDLED();
+		}
+        case B_R: {
+			return Q_HANDLED();
+		}
     }
     return Q_SUPER(&fsm_on_start);
 }
 
 // set level 0 easy, 1 medium, 2 difficult
 int changeLevel(int level){
+    // set level parameter and other stuff
+}
+
+// set level 0 easy, 1 medium, 2 difficult
+int setMode(int currentMode){
     // set level parameter and other stuff
 }
 
