@@ -21,4 +21,5 @@ void btn_init_game();
 void btn_mov_l();
 void btn_mov_r();
 void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2);
+void DisplText(char *s1, int rotated,int x,int y);
 #endif
