@@ -16,6 +16,7 @@
 typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
 } Lab2B;
+
  int act_volume = 0;
  int stored_value = 0;
  int Mute = 0;
@@ -27,12 +28,6 @@ typedef struct Lab2BTag  {               //Lab2B State machine
  volatile int d=0;
 
 int currentLevel = 0;
-/* Setup state machines */
-/**********************************************************************/
-// static QState Lab2B_initial (Lab2B *me);
-// static QState Lab2B_on      (Lab2B *me);
-// static QState Lab2B_A  (Lab2B *me);
-// static QState Lab2B_B  (Lab2B *me);
 
 static QState fsm_initial (Lab2B *me);
 // static QState fsm_game (Lab2B *me);
@@ -191,6 +186,10 @@ QState fsm_update(Lab2B *me) {
 		}
         case ChangeStatus: {
             // preserved state, can be adding balls random obstacle
+            return Q_HANDLED();
+        }
+        case BoardsChange: {
+            plotBoards();
             return Q_HANDLED();
         }
         case TICK_SIG: {
