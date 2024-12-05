@@ -33,6 +33,6 @@ void Lab2B_ctor(void);
  void TwistHandler(void *CallbackRef);
  void SWHandler(void *CallbackRef);
  void Tmr_Cter_Hdler(void *CallbackRef);
- void draw_ball(int x, int y, int r);
+ //void draw_ball(int x, int y, int r);
 
 #endif  
