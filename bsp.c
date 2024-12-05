@@ -200,22 +200,19 @@ void GpioHandler(void *CallbackRef) {
 	Xuint32 ButtonPressStatus = 0;
 	ButtonPressStatus = XGpio_DiscreteRead(&btn, BUTTON_CHANNEL);
 	if (ButtonPressStatus == 0x04) {
-			// QActive_postISR((QActive *)&l2b, B_R);
+			QActive_postISR((QActive *)&l2b, B_R);
 		}
 		else if (ButtonPressStatus == 0x02) {
 			QActive_postISR((QActive *)&l2b, B_L);
 		}
 		else if (ButtonPressStatus == 0x10) {
-			// QActive_postISR((QActive *)&l2b, B_C);
-			QActive_postISR((QActive *)&l2b, GameOn);
+			QActive_postISR((QActive *)&l2b, B_C);
 		}
 		else if (ButtonPressStatus == 0x01) {
-			// QActive_postISR((QActive *)&l2b, B_U);
-			QActive_postISR((QActive *)&l2b, ChangeLevelUp);
+			QActive_postISR((QActive *)&l2b, B_U);
 		}
 		else if (ButtonPressStatus == 0x08) {
-			// QActive_postISR((QActive *)&l2b, B_D);
-			QActive_postISR((QActive *)&l2b, ChangeLevelDown);
+			QActive_postISR((QActive *)&l2b, B_D);
 		}
 }
 
@@ -234,7 +231,7 @@ void TwistHandler(void *CallbackRef) {
 			toggle = !toggle;
 			state = S0;
 			encoder_count = 4;
-			// QActive_postISR((QActive *)&l2b,ENC_PRS);
+			QActive_postISR((QActive *)&l2b,ENC_PRS);
 		}
 		switch (state) {
 			case S0: {
@@ -262,8 +259,7 @@ void TwistHandler(void *CallbackRef) {
 				case 0b11: {if(encoder_count == 1) {
 					encoder_count = encoder_count - 1;
 					state = S0;
-					// QActive_postISR((QActive *)&l2b,ENCODER_DOWN);
-					}
+					QActive_postISR((QActive *)&l2b,ENCODER_DOWN);}
 				break;}
 				case 0b00: {
 					if(encoder_count == 5) {
@@ -296,8 +292,7 @@ void TwistHandler(void *CallbackRef) {
 					{if(encoder_count == 7) {
 						encoder_count = encoder_count + 1;
 						state = S0;
-						// QActive_postISR((QActive *)&l2b,ENCODER_UP);
-						}
+						QActive_postISR((QActive *)&l2b,ENCODER_UP);}
 					break;}
 					break;}
 			break;}
