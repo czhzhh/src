@@ -16,6 +16,7 @@
 typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
 } Lab2B;
+
  int act_volume = 0;
  int stored_value = 0;
  int Mute = 0;
