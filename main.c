@@ -11,7 +11,7 @@
 #include "my_rand.h"
 #include "sevenSeg_new.h"
 #include "trig.h"
-
+#include "logic.h"
 #include "dspl_upd.h"
 
 static QEvent l_lab2bQueue[30];
