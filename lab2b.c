@@ -46,14 +46,14 @@ void Lab2B_ctor(void)  {
 
 
 QState fsm_initial(Lab2B *me) {
-	xil_printf("\n\rInitialization");
+	xil_printf("Initialization\n\r");
     return Q_TRAN(&fsm_on_start);
 }
 
 QState fsm_on_start(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            xil_printf("rendering init screen\n\r");
+            xil_printf("rendering init screen fsm_on_start\n\r");
             // set init level
             changeLevel(currentLevel);
             // plot init frame(choose level and start game)
@@ -150,7 +150,14 @@ QState fsm_running(Lab2B *me) {
 			calculateNewPosition();
             changePosition();
             if(calculateHit()){
-                return Q_TRAN(&fsm_update);
+            	xil_printf("do_update\n\r");
+				calculateDirection();
+				if(calculateIsOver()){
+					updateScore();
+				}else{
+					xil_printf("do_update over\n\r");
+					return Q_TRAN(&fsm_over);
+				}
             }
 			return Q_HANDLED();
 		}
@@ -163,7 +170,8 @@ QState fsm_running(Lab2B *me) {
         }
         case ChangeLevelUp: {
         	// delate this later
-        	return Q_TRAN(&fsm_update);
+        	xil_printf("running to over\n\r");
+        	return Q_TRAN(&fsm_over);
             //return Q_HANDLED();
         }
         case ChangeLevelDown: {
@@ -175,6 +183,7 @@ QState fsm_running(Lab2B *me) {
     }
     return Q_SUPER(&fsm_on_start);
 }
+/*
 QState fsm_update(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
@@ -182,8 +191,10 @@ QState fsm_update(Lab2B *me) {
             calculateDirection();
             if(calculateIsOver()){
                 updateScore();
+                xil_printf("fsm_update 1\n\r");
                 return Q_TRAN(&fsm_running);
             }else{
+            	xil_printf("fsm_updatem 2\n\r");
                 return Q_TRAN(&fsm_over);
             }
 			return Q_HANDLED();
@@ -204,6 +215,7 @@ QState fsm_update(Lab2B *me) {
         }
         case ChangeLevelUp: {
         	// delate this later
+        	xil_printf("ChangeLevelUp in fsm_update\n\r");
         	return Q_TRAN(&fsm_over);
         	//return Q_HANDLED();
         }
@@ -213,13 +225,20 @@ QState fsm_update(Lab2B *me) {
     }
     return Q_SUPER(&fsm_on_start);
 }
+*/
 QState fsm_over(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
+        	xil_printf("fsm_over\n\r");
             displayEnd();
             return Q_HANDLED();
         }
         case GameOn: {
+        	xil_printf("rendering init screen from fsm_over\n\r");
+			// set init level
+			changeLevel(currentLevel);
+			// plot init frame(choose level and start game)
+			initScreenPlot();
             return Q_TRAN(&fsm_on_start);
         }
         case TICK_SIG: {
@@ -229,6 +248,7 @@ QState fsm_over(Lab2B *me) {
             return Q_HANDLED();
         }
         case ChangeLevelUp: {
+        	xil_printf("ChangeLevelUp in fsm_over\n\r");
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
@@ -268,7 +288,7 @@ void changePosition(){
 
 // calculate if hit the boarder
 int calculateHit(){
-	return 0;
+	return 1;
 }
 
 // plot reflect boards in the bottom according to the position switch
@@ -283,7 +303,7 @@ void calculateDirection(){
 
 // calculate if the game is over 
 int calculateIsOver(){
-
+	return 0;
 }
             
 //calculate if scored
