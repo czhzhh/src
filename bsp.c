@@ -186,11 +186,11 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
 void SWHandler(void *CallbackRef) {
     // Increment A counter
     XGpio *GpioPtr = (XGpio *)CallbackRef;
-    XGpio_InterruptClear(GpioPtr, SW_CHANNEL); // Çå³ýÖÐ¶Ï
+    XGpio_InterruptClear(GpioPtr, SW_CHANNEL);
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
     init_positions(5);
     count = analyzeBits(ButtonPressStatus, valid_sw, positions);
-    QActive_postISR((QActive *)&l2b, B_L);
+    //QActive_postISR((QActive *)&l2b, B_L);//please set a signal for using switch control
 }
 
 void GpioHandler(void *CallbackRef) {
@@ -203,7 +203,7 @@ void GpioHandler(void *CallbackRef) {
 			QActive_postISR((QActive *)&l2b, B_R);
 		}
 		else if (ButtonPressStatus == 0x02) {
-			//QActive_postISR((QActive *)&l2b, B_L);
+			QActive_postISR((QActive *)&l2b, B_L);
 		}
 		else if (ButtonPressStatus == 0x10) {
 			QActive_postISR((QActive *)&l2b, B_C);
