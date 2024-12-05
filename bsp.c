@@ -51,8 +51,8 @@ volatile int timer_state=0;
 int VolumeTimeOut = 0;
 int TextTimeOut = 0;
 static Xuint16 state = 0b11;
-int *positions = NULL; // ¶¯Ì¬·ÖÅäµÄÊý×é
-int valid_sw = 0;      // ³õÊ¼»¯Îª 0
+int *positions = NULL; // ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+int valid_sw = 0;      // ï¿½ï¿½Ê¼ï¿½ï¿½Îª 0
 
 
 static enum STATES {
@@ -63,7 +63,7 @@ static enum STATES {
 };
 
 
-// ³õÊ¼»¯Êý×é£¬¼ÆËãÃ¿ÐÐµÄÏñËØµãÊýÁ¿
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½é£¬ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½Ðµï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
 
 void BSP_init(void) {
 	Init_game();
@@ -146,26 +146,26 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
 
 void init_positions(int size) {
     if (positions != NULL) {
-        free(positions); // Èç¹ûÒÑ¾­·ÖÅäÄÚ´æ£¬ÏÈÊÍ·Å
+        free(positions); // ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´æ£¬ï¿½ï¿½ï¿½Í·ï¿½
     }
-    valid_sw = size; // ¸üÐÂ×î´ó¿ª¹ØÊýÁ¿
+    valid_sw = size; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó¿ª¹ï¿½ï¿½ï¿½ï¿½ï¿½
     positions = (int *)malloc(valid_sw * sizeof(int));
 }
 
 void free_positions(void) {
     if (positions != NULL) {
-        free(positions); // ÊÍ·ÅÄÚ´æ
+        free(positions); // ï¿½Í·ï¿½ï¿½Ú´ï¿½
         positions = NULL;
-        valid_sw = 0;   // ÖØÖÃ valid_sw
+        valid_sw = 0;   // ï¿½ï¿½ï¿½ï¿½ valid_sw
     }
 }
 
 int analyzeBits(uint32_t value, int valid_sw, int *positions) {
-    // Ö»È¡µÍ16Î»
+    // Ö»È¡ï¿½ï¿½16Î»
     value &= 0xFFFF;
-    // Ê¹ÓÃ __builtin_popcount ¿ìËÙ¼ÆËã1µÄ¸öÊý
+    // Ê¹ï¿½ï¿½ __builtin_popcount ï¿½ï¿½ï¿½Ù¼ï¿½ï¿½ï¿½1ï¿½Ä¸ï¿½ï¿½ï¿½
     int totalBits = __builtin_popcount(value);
-    // ¼ì²éÊÇ·ñ³¬³öÏÞÖÆ
+    // ï¿½ï¿½ï¿½ï¿½Ç·ñ³¬³ï¿½ï¿½ï¿½ï¿½ï¿½
     if (totalBits > valid_sw) {
         memset(positions, 0, valid_sw * sizeof(int));
         return 0;
@@ -173,13 +173,13 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
     int count = 0;
     uint32_t temp = value;
     while (temp) {
-        // »ñÈ¡×îµÍÎ»1µÄÎ»ÖÃ
+        // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Î»1ï¿½ï¿½Î»ï¿½ï¿½
         int pos = __builtin_ctz(temp);
         positions[count++] = 15 - pos;
-        // Çå³ý×îµÍÎ»µÄ1
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½1
         temp &= (temp - 1);
     }
-    return totalBits;  // ·µ»Ø×ÜµÄÖÃÎ»Êý
+    return totalBits;  // ï¿½ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½Î»ï¿½ï¿½
 }
 
 
@@ -200,19 +200,22 @@ void GpioHandler(void *CallbackRef) {
 	Xuint32 ButtonPressStatus = 0;
 	ButtonPressStatus = XGpio_DiscreteRead(&btn, BUTTON_CHANNEL);
 	if (ButtonPressStatus == 0x04) {
-			QActive_postISR((QActive *)&l2b, B_R);
+			// QActive_postISR((QActive *)&l2b, B_R);
 		}
 		else if (ButtonPressStatus == 0x02) {
 			QActive_postISR((QActive *)&l2b, B_L);
 		}
 		else if (ButtonPressStatus == 0x10) {
-			QActive_postISR((QActive *)&l2b, B_C);
+			// QActive_postISR((QActive *)&l2b, B_C);
+			QActive_postISR((QActive *)&l2b, GameOn);
 		}
 		else if (ButtonPressStatus == 0x01) {
-			QActive_postISR((QActive *)&l2b, B_U);
+			// QActive_postISR((QActive *)&l2b, B_U);
+			QActive_postISR((QActive *)&l2b, ChangeLevelUp);
 		}
 		else if (ButtonPressStatus == 0x08) {
-			QActive_postISR((QActive *)&l2b, B_D);
+			// QActive_postISR((QActive *)&l2b, B_D);
+			QActive_postISR((QActive *)&l2b, ChangeLevelDown);
 		}
 }
 
@@ -231,7 +234,7 @@ void TwistHandler(void *CallbackRef) {
 			toggle = !toggle;
 			state = S0;
 			encoder_count = 4;
-			QActive_postISR((QActive *)&l2b,ENC_PRS);
+			// QActive_postISR((QActive *)&l2b,ENC_PRS);
 		}
 		switch (state) {
 			case S0: {
@@ -259,7 +262,8 @@ void TwistHandler(void *CallbackRef) {
 				case 0b11: {if(encoder_count == 1) {
 					encoder_count = encoder_count - 1;
 					state = S0;
-					QActive_postISR((QActive *)&l2b,ENCODER_DOWN);}
+					// QActive_postISR((QActive *)&l2b,ENCODER_DOWN);
+					}
 				break;}
 				case 0b00: {
 					if(encoder_count == 5) {
@@ -292,7 +296,8 @@ void TwistHandler(void *CallbackRef) {
 					{if(encoder_count == 7) {
 						encoder_count = encoder_count + 1;
 						state = S0;
-						QActive_postISR((QActive *)&l2b,ENCODER_UP);}
+						// QActive_postISR((QActive *)&l2b,ENCODER_UP);
+						}
 					break;}
 					break;}
 			break;}
