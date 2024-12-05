@@ -220,8 +220,29 @@ void printChar(u8 c, int x, int y) {
 		}
 		pixelIndex++;
 	}
-
 	clrXY();
+}
+void printCharRotated(u8 c, int x, int y) {
+    u8 ch;
+    int row, col, byteIndex, bitIndex;
+
+    for (col = 0; col < cfont.x_size; col++) {
+        for (row = 0; row < cfont.y_size; row++) {
+            byteIndex = (c - cfont.offset) * (cfont.x_size >> 3) * cfont.y_size + 4 + (row * (cfont.x_size >> 3)) + (col / 8);
+            bitIndex = col % 8;
+            ch = cfont.font[byteIndex];
+            setXY(x - row, y + col, x - row, y + col);
+            if (ch & (1 << (7 - bitIndex))) {
+                LCD_Write_DATA(fch);
+                LCD_Write_DATA(fcl);
+            } else {
+                LCD_Write_DATA(bch);
+                LCD_Write_DATA(bcl);
+            }
+        }
+    }
+
+    clrXY();
 }
 
 // Print string
@@ -229,4 +250,10 @@ void lcdPrint(char *st, int x, int y) {
 	int i = 0;
 	while (*st != '\0')
 		printChar(*st++, x + cfont.x_size * i++, y);
+}
+void lcdPrintRotated(char *st, int x, int y) {
+    int i = 0;
+    while (*st != '\0') {
+        printCharRotated(*st++, x, y + i++ * cfont.x_size);
+    }
 }

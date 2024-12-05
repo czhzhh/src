@@ -105,6 +105,8 @@ void fillRect(int x1, int y1, int x2, int y2);
 
 void setFont(u8* font);
 void printChar(u8 c, int x, int y);
+void printCharRotated(u8 c, int x, int y);
 void lcdPrint(char *st, int x, int y);
+void lcdPrintRotated(char *st, int x, int y);
 
 #endif /* LCD_H_ */

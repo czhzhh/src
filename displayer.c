@@ -145,11 +145,13 @@ void draw_ball(Ball *ball) {
 //	}
 //}
 void dspl_init(){
-	/*
-	 * Game start
-	 * Settings
-	 *
-	 * */
+	//         ↓start here       ↓max display length if start from y=20
+	DisplText("Welcome to ez game"  , 1,220,0);
+	DisplText("Made by:"            , 1,200,4);
+	DisplText("Jiaji & Zhaohongzhi" , 1,180,8);
+	DisplText("START GAME"	        , 1,140,80);
+	DisplText("Settings"            , 1,120,80);
+	DisplText("Difficulty choose"   , 1,100,80);
 }
 void dspl_Settings(){
 	/*
@@ -158,10 +160,14 @@ void dspl_Settings(){
 	 * Number of Bouncers
 	 *
 	 * */
+	DisplText("Settings"            , 1,220,0);
+	DisplText("Bullet size"         , 1,160,60);
+	DisplText("Bullet Velocity"     , 1,140,60);
+	DisplText("Board Velocity"      , 1,120,60);
 }
 void dspl_game_Init() {
     fillRectColor(COLOR_BG, 0, 0, 239, 319);
-    initBall(&ball, 10, 10, -10, -10, 5);
+    initBall(&ball, 10, 10, -10, -8, 5);
     set_boarder(&ball, &boarder);
     btn_init_game();
 }
@@ -240,4 +246,14 @@ void btn_mov_r() {
     }
 }
 
+void DisplText(char *s1, int rotated,int x,int y) {
+    setColor(0, 100, 0);         // 设置前景颜色
+    setColorBg(0, 0, 255);      // 设置背景颜色
+    setFont(BigFont);               // 设置字体
+    if (rotated) {
+        lcdPrintRotated(s1, x, y); // 旋转 90 度打印
+    } else {
+        lcdPrint(s1, 75, 140);        // 默认水平打印
+    }
+}
 
