@@ -131,7 +131,6 @@ void QF_onStartup(void) {                 /* entered with interrupts locked */
 	xil_printf("QF_onStartup\n"); // Comment out once you are in your complete program
 	initLCD();
 	clrScr();
-	Set_Blue();
 }
 void QF_onIdle(void) {QF_INT_UNLOCK();}
 
@@ -162,20 +161,26 @@ void free_positions(void) {
 }
 
 int analyzeBits(uint32_t value, int valid_sw, int *positions) {
-    int count = 0;
-    for (int i = 0; i < 16; i++) {
-        if (value & (1 << i)) {
-            if (count < valid_sw) {
-                positions[count++] = 15 - i;
-            } else {
-                memset(positions, 0, valid_sw * sizeof(int));
-                return 0;
-            }
-        }
+    // 只取低16位
+    value &= 0xFFFF;
+    // 使用 __builtin_popcount 快速计算1的个数
+    int totalBits = __builtin_popcount(value);
+    // 检查是否超出限制
+    if (totalBits > valid_sw) {
+        memset(positions, 0, valid_sw * sizeof(int));
+        return 0;
     }
-    return count;
+    int count = 0;
+    uint32_t temp = value;
+    while (temp) {
+        // 获取最低位1的位置
+        int pos = __builtin_ctz(temp);
+        positions[count++] = 15 - pos;
+        // 清除最低位的1
+        temp &= (temp - 1);
+    }
+    return totalBits;  // 返回总的置位数
 }
-
 
 
 void SWHandler(void *CallbackRef) {
@@ -185,7 +190,7 @@ void SWHandler(void *CallbackRef) {
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
     init_positions(5);
     count = analyzeBits(ButtonPressStatus, valid_sw, positions);
-    //QActive_postISR((QActive *)&l2b, BoardsChange);
+    QActive_postISR((QActive *)&l2b, B_L);
 }
 
 void GpioHandler(void *CallbackRef) {
@@ -198,7 +203,7 @@ void GpioHandler(void *CallbackRef) {
 			QActive_postISR((QActive *)&l2b, B_R);
 		}
 		else if (ButtonPressStatus == 0x02) {
-			QActive_postISR((QActive *)&l2b, B_L);
+			//QActive_postISR((QActive *)&l2b, B_L);
 		}
 		else if (ButtonPressStatus == 0x10) {
 			QActive_postISR((QActive *)&l2b, B_C);
@@ -304,7 +309,6 @@ void Tmr_Cter_Hdler(void *CallbackRef){
 	}
 	if(VolumeTimeOut>3069){
 		printf("time out vol\n");
-		Tmr_Set_Blue();
 		MainVolumeState=0;
 	}
 		VolumeTimeOut++;}
@@ -316,7 +320,6 @@ void Tmr_Cter_Hdler(void *CallbackRef){
 		}
 		if(TextTimeOut>3069){
 			printf("time out txt\n");
-			Txt_Set_BLUE();
 			MainTextState=0;
 		}
 		TextTimeOut++;
