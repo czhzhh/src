@@ -17,4 +17,8 @@ void erase_former(int former_x,int former_y,int r);
 void Init_Bricks(void);
 void Bricks(int count, int *positions);
 void update();
+void btn_init_game();
+void btn_mov_l();
+void btn_mov_r();
+void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2);
 #endif

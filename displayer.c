@@ -24,15 +24,37 @@
 #define BRICK_GAP 1
 #define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP) // 每砖块占用的总高度
 #define BRICK_WIDTH 8
+#define SCREEN_HEIGHT 319
+#define BAR_WIDTH 8
+#define COLOR_BAR 0xFF0000    // bar color
+#define COLOR_BG  0x228B22    // background color
+#define COLOR_BALL   0x8A2BE2    //ball color (138, 43, 226)
 
 int Brck_Pos[BRICKS_COUNT][4];
 int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
 int former_x=0;
 int former_y=0;
 extern int d;
+int init_yleft = 100;
+int y_bias = 120;
+int now_yleft;
+int moving_step = 20;
+int MAX_POS = 199;
 
 Ball ball;
 Boarder boarder;
+
+
+void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2) {
+    setColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+    fillRect(x1, y1, x2, y2);
+}
+
+void drawHLineColor(uint32_t color, int x, int y, int length) {
+    setColor((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+    drawHLine(x, y, length);
+}
+
 void Init_game(){
 	init_ball_pixel_counts();
 	Init_Bricks();
@@ -56,14 +78,13 @@ void init_ball_pixel_counts() {
 }
 
 void draw_ball(Ball *ball) {
-	setColor(138, 43, 226);
-	    for (int dy = -ball->radius; dy <= ball->radius; dy++) {
-	        int dx_count = ball_pixel_counts[ball->radius][dy + ball->radius]; // 获取预计算的像素点数量
-	        int x_start = ball->x - (dx_count / 2); // 计算水平起始点
-	        drawHLine(x_start, ball->y + dy, dx_count); // 绘制水平线
-	    }
-	    former_x=ball->x;
-	    former_y=ball->y;
+    for (int dy = -ball->radius; dy <= ball->radius; dy++) {
+        int dx_count = ball_pixel_counts[ball->radius][dy + ball->radius];
+        int x_start = ball->x - (dx_count / 2);
+        drawHLineColor(COLOR_BALL, x_start, ball->y + dy, dx_count);
+    }
+    former_x = ball->x;
+    former_y = ball->y;
 }
 
 //void DrawBorder() {
@@ -138,24 +159,21 @@ void dspl_Settings(){
 	 *
 	 * */
 }
-void dspl_game_Init(){
-	setColor(34, 139, 34);
-	fillRect(0,0,239,319);
-	initBall(&ball,10,10,10,10,5);
-	set_boarder(&ball,&boarder);
+void dspl_game_Init() {
+    fillRectColor(COLOR_BG, 0, 0, 239, 319);
+    initBall(&ball, 10, 10, -10, -10, 5);
+    set_boarder(&ball, &boarder);
+    btn_init_game();
 }
-void erase_former(int former_x,int former_y,int r){
-	/*SHOULD USE ERASER BEFORE UPDATE
-	 * erase last ball
-	 * erase last score
-	 * */
-	setColor(34, 139, 34);
-	for (int dy = -r; dy <= r; dy++) {
-	    int dx_count = ball_pixel_counts[r][dy + r]; // 获取预计算的像素点数量
-	    int x_start = former_x - (dx_count / 2); // 计算水平起始点
-	    drawHLine(x_start, former_y + dy, dx_count); // 绘制水平线
-	}
+
+void erase_former(int former_x, int former_y, int r) {
+    for (int dy = -r; dy <= r; dy++) {
+        int dx_count = ball_pixel_counts[r][dy + r];
+        int x_start = former_x - (dx_count / 2);
+        drawHLineColor(COLOR_BG, x_start, former_y + dy, dx_count);
+    }
 }
+
 void Init_Bricks(void) {
     int x1 = 1;
     int x2 = x1 + BRICK_WIDTH - 1;
@@ -170,51 +188,56 @@ void Init_Bricks(void) {
         Brck_Pos[i][3] = y2;
     }
 }
+
 void Bricks(int count, int *positions) {
-    setColor(34, 139, 34);
-    fillRect(0, 0, 8, 319);
+    fillRectColor(COLOR_BG, 0, 0, 8, 319);
     if (count > 0) {
-        setColor(255, 0, 0);
         for (int i = 0; i < count; i++) {
             int index = positions[i];
-            int x1 = Brck_Pos[index][0];
-            int y1 = Brck_Pos[index][1];
-            int x2 = Brck_Pos[index][2];
-            int y2 = Brck_Pos[index][3];
-            fillRect(x1, y1, x2, y2);
+            fillRectColor(COLOR_BAR, Brck_Pos[index][0], Brck_Pos[index][1],
+                         Brck_Pos[index][2], Brck_Pos[index][3]);
         }
     }
 }
+
 void Score(){
 
 }
 
 void update(){
 	erase_former(former_x,former_y,8);
-	printf("Before updateBall: x=%d, y=%d, address=%p\n", ball.x, ball.y, &ball);
     updateBall(&ball, &boarder);
-    printf("After updateBall: x=%d, y=%d, address=%p\n", ball.x, ball.y, &ball);
     draw_ball(&ball);
-    printf("After draw_ball: x=%d, y=%d, address=%p\n", ball.x, ball.y, &ball);
 }
 
 
+void btn_init_game() {
+    now_yleft = init_yleft;
+    fillRectColor(COLOR_BAR, 0, now_yleft, BAR_WIDTH, now_yleft + y_bias);
+}
 
+void btn_mov_l() {
+    if (now_yleft <= moving_step) {
+        fillRectColor(COLOR_BG, 0, y_bias + 1, BAR_WIDTH, 2 * y_bias);
+        fillRectColor(COLOR_BAR, 0, 0, BAR_WIDTH, y_bias);
+        now_yleft = 0;
+    } else {
+        fillRectColor(COLOR_BG, 0, now_yleft + y_bias - moving_step, BAR_WIDTH, now_yleft + y_bias);
+        now_yleft -= moving_step;
+        fillRectColor(COLOR_BAR, 0, now_yleft, BAR_WIDTH, now_yleft + moving_step);
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void btn_mov_r() {
+    if (now_yleft + moving_step >= MAX_POS) {
+        fillRectColor(COLOR_BG, 0, SCREEN_HEIGHT - 2 * y_bias, BAR_WIDTH, SCREEN_HEIGHT - y_bias);
+        fillRectColor(COLOR_BAR, 0, MAX_POS, BAR_WIDTH, SCREEN_HEIGHT);
+        now_yleft = MAX_POS;
+    } else {
+        fillRectColor(COLOR_BG, 0, now_yleft, BAR_WIDTH, now_yleft + moving_step);
+        now_yleft += moving_step;
+        fillRectColor(COLOR_BAR, 0, now_yleft + y_bias - moving_step, BAR_WIDTH, now_yleft + y_bias);
+    }
+}
 
 
