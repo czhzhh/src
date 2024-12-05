@@ -9,7 +9,7 @@
 #include "lcd.h"
 #include "displayer.h"
 #include <math.h>
-
+#include "xil_printf.h"
 
 
 
@@ -53,7 +53,7 @@ QState fsm_initial(Lab2B *me) {
 QState fsm_on_start(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
-            xil_printf("rendering init screen\n");
+            xil_printf("rendering init screen\n\r");
             // set init level
             changeLevel(currentLevel);
             // plot init frame(choose level and start game)
@@ -64,21 +64,21 @@ QState fsm_on_start(Lab2B *me) {
             return Q_HANDLED();
         }
         case ChangeLevelUp: {
-            xil_printf("change mode up\n");
+            xil_printf("change mode up\n\r");
             currentLevel = (currentLevel == 2) ? 0 : currentLevel + 1;
             changeLevel(currentLevel);
             initScreenPlot();
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
-            xil_printf("change mode down\n");
+            xil_printf("change mode down\n\r");
             currentLevel = (currentLevel == 0) ? 2 : currentLevel - 1;
             changeLevel(currentLevel);
             initScreenPlot();
             return Q_HANDLED();
         }
         case GameOn: {
-            xil_printf("game on\n");
+            xil_printf("game on\n\r");
             setBallInitPosition();
             return Q_TRAN(&fsm_running);
         }
@@ -143,6 +143,7 @@ QState fsm_on_start(Lab2B *me) {
 QState fsm_running(Lab2B *me) {
 	    switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
+        	xil_printf("fsm_running\n\r");
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
@@ -161,7 +162,9 @@ QState fsm_running(Lab2B *me) {
             return Q_HANDLED();
         }
         case ChangeLevelUp: {
-            return Q_HANDLED();
+        	// delate this later
+        	return Q_TRAN(&fsm_update);
+            //return Q_HANDLED();
         }
         case ChangeLevelDown: {
             return Q_HANDLED();
@@ -175,6 +178,7 @@ QState fsm_running(Lab2B *me) {
 QState fsm_update(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
+        	xil_printf("fsm_update\n\r");
             calculateDirection();
             if(calculateIsOver()){
                 updateScore();
@@ -199,7 +203,9 @@ QState fsm_update(Lab2B *me) {
             return Q_HANDLED();
         }
         case ChangeLevelUp: {
-            return Q_HANDLED();
+        	// delate this later
+        	return Q_TRAN(&fsm_over);
+        	//return Q_HANDLED();
         }
         case ChangeLevelDown: {
             return Q_HANDLED();
@@ -262,7 +268,7 @@ void changePosition(){
 
 // calculate if hit the boarder
 int calculateHit(){
-
+	return 0;
 }
 
 // plot reflect boards in the bottom according to the position switch
