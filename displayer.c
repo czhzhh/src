@@ -146,24 +146,25 @@ void draw_ball(Ball *ball) {
 //}
 void dspl_init(){
 	//         ↓start here       ↓max display length if start from y=20
-	DisplText("Welcome to ez game"  , 1,220,0);
-	DisplText("Made by:"            , 1,200,4);
-	DisplText("Jiaji & Zhaohongzhi" , 1,180,8);
-	DisplText("START GAME"	        , 1,140,80);
-	DisplText("Settings"            , 1,120,80);
-	DisplText("Difficulty choose"   , 1,100,80);
+	DisplText("Welcome to ez game"  , 1,220,0,  BigFont);
+	DisplText("Made by:"            , 1,200,4,  SmallFont);
+	DisplText("Jiaji & Zhaohongzhi" , 1,180,8,  SmallFont);
+	DisplText("START GAME"	        , 1,140,80, SmallFont);
+	DisplText("Settings"            , 1,120,80, SmallFont);
+}
+DisplInt(int a, int rotated,int x,int y,u8* font){
+	char buffer[16];
+	sprintf(buffer, "%d", a);
+	DisplText(buffer,rotated,x,y,font);
 }
 void dspl_Settings(){
-	/*
-	 * Difficulty(Velocity)
-	 * Bullet Size
-	 * Number of Bouncers
-	 *
-	 * */
-	DisplText("Settings"            , 1,220,0);
-	DisplText("Bullet size"         , 1,160,60);
-	DisplText("Bullet Velocity"     , 1,140,60);
-	DisplText("Board Velocity"      , 1,120,60);
+
+	DisplText("Settings"            , 1,220,0,  BigFont);
+	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks or Board"     , 1,180,200, SmallFont);
+	DisplText("Bricks Num"          , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
+	DisplText("Bullet size"         , 1,140,60, SmallFont);
+	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);
+	DisplText("Board Velocity"      , 1,100,60, SmallFont);
 }
 void dspl_game_Init() {
     fillRectColor(COLOR_BG, 0, 0, 239, 319);
@@ -246,10 +247,10 @@ void btn_mov_r() {
     }
 }
 
-void DisplText(char *s1, int rotated,int x,int y) {
-    setColor(0, 100, 0);         // 设置前景颜色
+void DisplText(char *s1, int rotated,int x,int y,u8* font) {
+    setColor(0, 255, 0);         // 设置前景颜色
     setColorBg(0, 0, 255);      // 设置背景颜色
-    setFont(BigFont);               // 设置字体
+    setFont(font);               //SmallFont/BigFont/SevenSegNumFont
     if (rotated) {
         lcdPrintRotated(s1, x, y); // 旋转 90 度打印
     } else {
