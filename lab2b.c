@@ -171,12 +171,26 @@ QState fsm_running(Lab2B *me) {
         case ChangeLevelUp: {
         	// delate this later
         	xil_printf("running to over\n\r");
+        	update();
+        	d+=1;
         	return Q_TRAN(&fsm_over);
             //return Q_HANDLED();
         }
         case ChangeLevelDown: {
+        	xil_printf("down button pressed\n");
+        	//dspl_game_Init();
             return Q_HANDLED();
         }
+        case B_L: {
+			//Bricks(count, positions);
+			//free_positions();
+        	btn_mov_l();
+			return Q_HANDLED();
+		}
+        case B_R: {
+			btn_mov_r();
+			return Q_HANDLED();
+		}
         case ChangeStatus: {
             return Q_HANDLED();
         }
