@@ -34,7 +34,9 @@ int main()
 	Xil_ICacheEnable();
 	Xil_DCacheInvalidate();
 	Xil_DCacheEnable();
-	Lab2B_ctor(); // inside of lab2a.c
+	Lab2B_ctor();
+	//QHsm_init((QHsm *)&newGame);
+	//Lab2B_ctor(); // inside of lab2a.c
 	BSP_init(); // inside of bsp.c, starts out empty!
 	QF_run();
     return 0;

@@ -9,220 +9,362 @@
 #include "lcd.h"
 #include "displayer.h"
 #include <math.h>
-
+#include "xil_printf.h"
 
 
 
 typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
 } Lab2B;
-int act_volume = 0;
-int stored_value = 0;
-int Mute = 0;
-int MainVolumeState = 0;
-int VolumeState = 0;
-int MainTextState = 0;
-int TextState = 0;
-int last_vol=0;
-volatile int d=0;
-/* Setup state machines */
-/**********************************************************************/
-static QState Lab2B_initial (Lab2B *me);
-static QState Lab2B_on      (Lab2B *me);
-static QState Lab2B_A  (Lab2B *me);
-static QState Lab2B_B  (Lab2B *me);
 
+ int act_volume = 0;
+ int stored_value = 0;
+ int Mute = 0;
+ int MainVolumeState = 0;
+ int VolumeState = 0;
+ int MainTextState = 0;
+ int TextState = 0;
+ int last_vol=0;
+ volatile int d=0;
 
+int currentLevel = 0;
+int currentMode = 0;
+int initPlotVar = 0;
+int setChangeFlag = 0;
+
+static QState fsm_initial (Lab2B *me);
+static QState fsm_on_start (Lab2B *me);
+static QState fsm_SW (Lab2B *me);
+static QState fsm_Btn (Lab2B *me);
+static QState fsm_over (Lab2B *me);
+static QState fsm_Setting (Lab2B *me);
 /**********************************************************************/
 Lab2B l2b;
 
 
 void Lab2B_ctor(void)  {
 	Lab2B *me = &l2b;
-	QActive_ctor(&me->super, (QStateHandler)&Lab2B_initial);
+	QActive_ctor(&me->super, (QStateHandler)&fsm_initial);
 }
 
 
-QState Lab2B_initial(Lab2B *me) {
-	xil_printf("\n\rInitialization");
-    return Q_TRAN(&Lab2B_on);
+QState fsm_initial(Lab2B *me) {
+	xil_printf("Initialization\n\r");
+    return Q_TRAN(&fsm_on_start);
 }
 
-QState Lab2B_on(Lab2B *me) {
-	switch (Q_SIG(me)) {
-		case Q_ENTRY_SIG: {
-			xil_printf("On\n");
-			}
-		case Q_INIT_SIG: {
-			return Q_TRAN(&Lab2B_A);
-			}
-	}
+QState fsm_on_start(Lab2B *me) {
+    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+            xil_printf("rendering init screen fsm_on_start\n\r");
+            // set init level
+            changeLevel(currentLevel);
+            setMode(currentMode);
+            // plot init frame(choose level and start game)
+            initScreenPlot();
+            return Q_HANDLED();
+        }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            xil_printf("change mode up\n\r");
+            initPlotVar = (initPlotVar == 1) ? 0 : initPlotVar + 1;
+            initScreenPlot();
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            xil_printf("change mode down\n\r");
+            // currentLevel = (currentLevel == 0) ? 2 : currentLevel - 1;
+            // changeLevel(currentLevel);
+            initPlotVar = (initPlotVar == 1) ? 0 : initPlotVar + 1;
+            initScreenPlot();
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            xil_printf("game on\n\r");
+            //setBallInitPosition();
+            if(initPlotVar == 0){
+                if(currentMode){
+                    return Q_TRAN(&fsm_SW);
+                }else{
+                    return Q_TRAN(&fsm_Btn);
+                }
+            }else{
+                return Q_TRAN(&fsm_Setting);
+            }
+            return Q_HANDLED();
+        }
+        case BoardsChange: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+        case B_L: {
+			return Q_HANDLED();
+		}
+        case B_R: {
+			return Q_HANDLED();
+		}
+    }
 	return Q_SUPER(&QHsm_top);
 }
-void Vol_up(){
-	printf("Volume: %d\n",act_volume);
-	setColor(0, 0, 0);
-	fillRect(act_volume+70, 90, 170, 110);
-	setColorBg(255, 0, 0);
-	fillRect(act_volume+69, 90, act_volume+70, 110);
-	MainVolumeState=1;
-	VolumeState=1;
-}
-void Vol_down(){
-	printf("Volume: %d\n",act_volume);
-	setColor(0, 0, 0);
-	fillRect(act_volume+71, 90, 170, 110);
-	setColor(0, 0, 0);
-	fillRect(act_volume+70, 90, act_volume+71, 110);
-	MainVolumeState = 1;
-	VolumeState = 1;
+
+QState fsm_Setting(Lab2B *me) {
+    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+            xil_printf("Into settinhg\n\r");
+            // set init level
+            dspl_Settings();
+            return Q_HANDLED();
+        }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+            xil_printf("change mode up\n\r");
+            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag + 1;
+            // plot the arrow
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            xil_printf("change mode down\n\r");
+            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag - 1;
+            // plot the arrow
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            xil_printf("back to begining\n\r");
+            return Q_TRAN(&fsm_on_start);
+        }
+        case B_L: {
+            // change paras according to setChangeFlag
+			return Q_HANDLED();
+		}
+        case B_R: {
+            // change paras according to setChangeFlag
+			return Q_HANDLED();
+		}
+        case BoardsChange: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+    }
+	return Q_SUPER(&fsm_on_start);
 }
 
-void VolumeToggle(int toggle) {
-	if (toggle == 1) {
-		last_vol=act_volume;
-		act_volume=0;
-		setColor(0, 0, 0);
-		fillRect(70, 90, 170, 110);
-		MainVolumeState = 1;
-		VolumeState = 1;
-	} 
-	else {
-		act_volume=last_vol;
-		setColor(0, 255, 0);
-		fillRect(69, 90, 70+act_volume, 110);
-		setColor(0, 0, 0);
-		fillRect(act_volume+71, 90, 170, 110);
-		MainVolumeState=1;
-		VolumeState=1;
-	}
-}
-void DisplText(char* s1) {
-	Txt_Set_BLUE(); 
-	setColor(255, 191, 50);
-	setColorBg(255, 255, 255);
-	setFont(BigFont);
-	lcdPrint(s1, 75, 140);
-	MainTextState = 1;
-	TextState = 1;
-}
-/* Create Lab2B_on state and do any initialization code if needed */
-/******************************************************************/
-QState Lab2B_A(Lab2B *me) {
-	switch (Q_SIG(me)) {
-		case Q_ENTRY_SIG: {
-			xil_printf("Startup State A\n");
+QState fsm_SW(Lab2B *me) {
+	    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+        	xil_printf("fsm_SW\n\r");
 			return Q_HANDLED();
 		}
-		case ENCODER_UP: {
-			xil_printf("Encoder Up in State A\n");
-			if(act_volume<100){
-				act_volume++;
-			}
-			else if (act_volume >= 100) {		//Worst case if bugged
-							act_volume = 100;
-						}
-			Vol_up();
+        case TICK_SIG: {
+			// calculateNewPosition();
+            // changePosition();
+            update();
+            // int gameover
+            // if(gameover){
+            // 	xil_printf("game over\n\r");
+			// 	return Q_TRAN(&fsm_over);
+
+            // }
 			return Q_HANDLED();
 		}
-		case ENCODER_DOWN: {
-			xil_printf("Encoder Down in State A\n");
-			if(act_volume>0)act_volume--;
-			else if (act_volume <= 0) {		//Worst case if bugged
-							act_volume = 0;
-						}
-			Vol_down();
+        case BoardsChange: {
+            Bricks(count,positions);
+            free_positions();
+            // plotBoards();
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+        	// delate this later
+        	// update();
+        	// d+=1;
+        	// return Q_TRAN(&fsm_over);
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+        	xil_printf("down button pressed\n");
+        	//dspl_game_Init();
+            return Q_HANDLED();
+        }
+        case B_L: {
+			//Bricks(count, positions);
+			//free_positions();
+        	//btn_mov_l();
 			return Q_HANDLED();
 		}
-		case ENC_PRS:{
-			xil_printf("Changing State\n");
-			Mute=1;
-			VolumeToggle(Mute);
-			return Q_TRAN(&Lab2B_B);
-		}
-		case B_U:{
-			xil_printf("upper button pressed\n");
-			update();
-			d+=1;
+        case B_R: {
+			//btn_mov_r();
 			return Q_HANDLED();
 		}
-		case B_D:{
-			xil_printf("down button pressed\n");
-			dspl_game_Init();
-			return Q_HANDLED();
-		}
-		case B_L:{
-			xil_printf("left button pressed\n");
-			Bricks(count, positions);
-			free_positions();
-			return Q_HANDLED();
-		}
-		case B_R:{
-			xil_printf("right button pressed\n");
-			DisplText("no");
-			return Q_HANDLED();
-		}
-		case B_C:{
-			xil_printf("centurl button pressed\n");
-			DisplText("parties");
-			return Q_HANDLED();
-		}
-	}
-	return Q_SUPER(&Lab2B_on);
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+    }
+    return Q_SUPER(&fsm_on_start);
 }
 
-QState Lab2B_B(Lab2B *me) {
-	switch (Q_SIG(me)) {
-		case Q_ENTRY_SIG: {
-			xil_printf("Startup State B\n");
+QState fsm_Btn(Lab2B *me) {
+	    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+        	xil_printf("fsm_Btn\n\r");
 			return Q_HANDLED();
 		}
-		
-		case ENCODER_UP: {
-			xil_printf("Encoder Up in State B\n");
-			Mute=0;
-			act_volume=0;
-			Vol_up();
-			return Q_TRAN(&Lab2B_A);
-		}
+        case TICK_SIG: {
+			// calculateNewPosition();
+            // changePosition();
+            update();
+            // int gameover
+            // if(gameover){
+            // 	xil_printf("game over\n\r");
+			// 	return Q_TRAN(&fsm_over);
 
-		case ENCODER_DOWN: {
-			xil_printf("Encoder Down from State B\n");
+            // }
 			return Q_HANDLED();
 		}
-
-		case ENC_PRS:  {
-			xil_printf("Changing State\n");
-			Mute=0;
-			VolumeToggle(Mute);
-			return Q_TRAN(&Lab2B_A);
-		}
-		case B_U:{
-			xil_printf("upper button pressed\n");
-			DisplText("ECE");
+        case BoardsChange: {
+            //Bricks(count,positions);
+            //free_positions();
+            // plotBoards();
+            return Q_HANDLED();
+        }
+        case GameOn: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+        	// delate this later
+        	// update();
+        	// d+=1;
+        	// return Q_TRAN(&fsm_over);
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+        	xil_printf("down button pressed\n");
+        	//dspl_game_Init();
+            return Q_HANDLED();
+        }
+        case B_L: {
+			//Bricks(count, positions);
+			//free_positions();
+        	btn_mov_l();
 			return Q_HANDLED();
 		}
-		case B_D:{
-			xil_printf("down button pressed\n");
-			DisplText("guys");
+        case B_R: {
+			btn_mov_r();
 			return Q_HANDLED();
 		}
-		case B_L:{
-			xil_printf("left button pressed\n");
-			DisplText("have");
-			return Q_HANDLED();
-		}
-		case B_R:{
-			xil_printf("right button pressed\n");
-			DisplText("no");
-			return Q_HANDLED();
-		}
-		case B_C:{
-			xil_printf("centurl button pressed\n");
-			DisplText("parties");
-			return Q_HANDLED();
-		}
-	}
-	return Q_SUPER(&Lab2B_on);
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+    }
+    return Q_SUPER(&fsm_on_start);
 }
 
+QState fsm_over(Lab2B *me) {
+    switch (Q_SIG(me)) {
+        case Q_ENTRY_SIG: {
+        	xil_printf("fsm_over\n\r");
+            displayEnd();
+            return Q_HANDLED();
+        }
+        case GameOn: {
+        	xil_printf("rendering init screen from fsm_over\n\r");
+			// set init level
+			changeLevel(currentLevel);
+			// plot init frame(choose level and start game)
+			initScreenPlot();
+            return Q_TRAN(&fsm_on_start);
+        }
+        case TICK_SIG: {
+            return Q_HANDLED();
+        }
+        case BoardsChange: {
+            return Q_HANDLED();
+        }
+        case ChangeLevelUp: {
+        	xil_printf("ChangeLevelUp in fsm_over\n\r");
+            return Q_HANDLED();
+        }
+        case ChangeLevelDown: {
+            return Q_HANDLED();
+        }
+        case ChangeStatus: {
+            return Q_HANDLED();
+        }
+        case B_L: {
+			return Q_HANDLED();
+		}
+        case B_R: {
+			return Q_HANDLED();
+		}
+    }
+    return Q_SUPER(&fsm_on_start);
+}
+
+// set level 0 easy, 1 medium, 2 difficult
+int changeLevel(int level){
+    // set level parameter and other stuff
+}
+
+// set level 0 easy, 1 medium, 2 difficult
+int setMode(int currentMode){
+    // set level parameter and other stuff
+}
+
+// plot init frame (choose level and start game)
+void initScreenPlot(int level){
+    // plot screen
+}
+
+// set ball's init position
+void setBallInitPosition(){
+    //
+}
+
+//calculate next position
+void calculateNewPosition(){
+
+}
+
+// plot ball's new position
+void changePosition(){
+
+}
+
+// calculate if hit the boarder
+int calculateHit(){
+	return 1;
+}
+
+// plot reflect boards in the bottom according to the position switch
+int plotBoards(){
+
+}
+
+//calculate new direction after reflection
+void calculateDirection(){
+
+}
+
+// calculate if the game is over 
+int calculateIsOver(){
+	return 0;
+}
+            
+//calculate if scored
+void updateScore(){
+
+}
+
+// display game over
+void displayEnd(){
+
+}
