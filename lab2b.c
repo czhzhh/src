@@ -16,15 +16,15 @@
 typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
 } Lab2B;
-// int act_volume = 0;
-// int stored_value = 0;
-// int Mute = 0;
-// int MainVolumeState = 0;
-// int VolumeState = 0;
-// int MainTextState = 0;
-// int TextState = 0;
-// int last_vol=0;
-// volatile int d=0;
+ int act_volume = 0;
+ int stored_value = 0;
+ int Mute = 0;
+ int MainVolumeState = 0;
+ int VolumeState = 0;
+ int MainTextState = 0;
+ int TextState = 0;
+ int last_vol=0;
+ volatile int d=0;
 
 int currentLevel = 0;
 /* Setup state machines */
@@ -205,9 +205,6 @@ QState fsm_update(Lab2B *me) {
         case ChangeLevelDown: {
             return Q_HANDLED();
         }
-        case ChangeStatus: {
-            return Q_HANDLED();
-        }
     }
     return Q_SUPER(&fsm_on_start);
 }
@@ -236,7 +233,7 @@ QState fsm_over(Lab2B *me) {
             return Q_HANDLED();
         }
     }
-    return Q_SUPER(&fsm_game);
+    return Q_SUPER(&fsm_on_start);
 }
 
 // set level 0 easy, 1 medium, 2 difficult
