@@ -51,8 +51,8 @@ volatile int timer_state=0;
 int VolumeTimeOut = 0;
 int TextTimeOut = 0;
 static Xuint16 state = 0b11;
-int *positions = NULL; // ��̬���������
-int valid_sw = 0;      // ��ʼ��Ϊ 0
+int *positions = NULL; // 锟斤拷态锟斤拷锟斤拷锟斤拷锟斤拷锟�
+int valid_sw = 0;      // 锟斤拷始锟斤拷为 0
 
 
 static enum STATES {
@@ -63,10 +63,9 @@ static enum STATES {
 };
 
 
-// ��ʼ�����飬����ÿ�е����ص�����
+// 锟斤拷始锟斤拷锟斤拷锟介，锟斤拷锟斤拷每锟叫碉拷锟斤拷锟截碉拷锟斤拷锟斤拷
 
 void BSP_init(void) {
-	Init_game();
     XSpi_Config *spiConfig;  /* Pointer to Configuration data */
     u32 controlReg;
 
@@ -101,7 +100,7 @@ void BSP_init(void) {
 
     XTmrCtr_SetHandler(&axiTimer, Tmr_Cter_Hdler, &axiTimer);
     XTmrCtr_SetOptions(&axiTimer, 0, XTC_INT_MODE_OPTION | XTC_AUTO_RELOAD_OPTION);
-    XTmrCtr_SetResetValue(&axiTimer, 0, 0xFFFF0000);
+    XTmrCtr_SetResetValue(&axiTimer, 0, 0xFFFFFFFF-0x1312D00);
     XTmrCtr_Start(&axiTimer, 0);
     xil_printf("Timer start!\n");
 
@@ -146,26 +145,23 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
 
 void init_positions(int size) {
     if (positions != NULL) {
-        free(positions); // ����Ѿ������ڴ棬���ͷ�
+        free(positions);
     }
-    valid_sw = size; // ������󿪹�����
+    valid_sw = size;
     positions = (int *)malloc(valid_sw * sizeof(int));
 }
 
 void free_positions(void) {
     if (positions != NULL) {
-        free(positions); // �ͷ��ڴ�
+        free(positions);
         positions = NULL;
-        valid_sw = 0;   // ���� valid_sw
+        valid_sw = 0;
     }
 }
 
 int analyzeBits(uint32_t value, int valid_sw, int *positions) {
-    // ֻȡ��16λ
     value &= 0xFFFF;
-    // ʹ�� __builtin_popcount ���ټ���1�ĸ���
     int totalBits = __builtin_popcount(value);
-    // ����Ƿ񳬳�����
     if (totalBits > valid_sw) {
         memset(positions, 0, valid_sw * sizeof(int));
         return 0;
@@ -173,13 +169,11 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
     int count = 0;
     uint32_t temp = value;
     while (temp) {
-        // ��ȡ���λ1��λ��
         int pos = __builtin_ctz(temp);
         positions[count++] = 15 - pos;
-        // ������λ��1
         temp &= (temp - 1);
     }
-    return totalBits;  // �����ܵ���λ��
+    return totalBits;
 }
 
 
@@ -190,7 +184,7 @@ void SWHandler(void *CallbackRef) {
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
     init_positions(5);
     count = analyzeBits(ButtonPressStatus, valid_sw, positions);
-    //QActive_postISR((QActive *)&l2b, B_L);//please set a signal for using switch control
+    QActive_postISR((QActive *)&l2b,BoardsChange);
 }
 
 void GpioHandler(void *CallbackRef) {
@@ -206,13 +200,13 @@ void GpioHandler(void *CallbackRef) {
 			QActive_postISR((QActive *)&l2b, B_L);
 		}
 		else if (ButtonPressStatus == 0x10) {
-			QActive_postISR((QActive *)&l2b, B_C);
+			QActive_postISR((QActive *)&l2b, GameOn);
 		}
 		else if (ButtonPressStatus == 0x01) {
-			QActive_postISR((QActive *)&l2b, B_U);
+			QActive_postISR((QActive *)&l2b, ChangeLevelUp);
 		}
 		else if (ButtonPressStatus == 0x08) {
-			QActive_postISR((QActive *)&l2b, B_D);
+			QActive_postISR((QActive *)&l2b,ChangeLevelDown);
 		}
 }
 
@@ -300,28 +294,5 @@ void TwistHandler(void *CallbackRef) {
 	XGpio_InterruptClear(GpioPtr, GPIO_CHANNEL1);
 }
 void Tmr_Cter_Hdler(void *CallbackRef){
-	if(MainVolumeState==1){
-		if (VolumeState == 1) {
-		setColor(0,255,00);
-		fillRect(70, 90, act_volume+70, 110);
-		VolumeTimeOut = 0;
-		VolumeState = 0;
-	}
-	if(VolumeTimeOut>3069){
-		printf("time out vol\n");
-		MainVolumeState=0;
-	}
-		VolumeTimeOut++;}
-
-	if(MainTextState==1){
-		if(TextState==1){
-			TextTimeOut=0;
-			TextState=0;
-		}
-		if(TextTimeOut>3069){
-			printf("time out txt\n");
-			MainTextState=0;
-		}
-		TextTimeOut++;
-	}
+	QActive_postISR((QActive *)&l2b,TICK_SIG);
 }

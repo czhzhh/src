@@ -34,17 +34,12 @@ void set_boarder(Ball *ball, Boarder *Boarder){
 	Boarder->x_max=239-ball->radius;
 	Boarder->y_min=    ball->radius;
 	Boarder->y_max=319-ball->radius;
-	printf("x_min: %d\n", Boarder->x_min);
-	    printf("x_max: %d\n", Boarder->x_max);
-	    printf("y_min: %d\n", Boarder->y_min);
-	    printf("y_max: %d\n", Boarder->y_max);
 }
 void updateBall(Ball *ball, Boarder *Boarder) {
-    // 先更新位置
+
     ball->x += ball->vx;
     ball->y += ball->vy;
 
-    // 检查并修正x方向的边界碰撞
     if (ball->x <= Boarder->x_min) {
         ball->x = Boarder->x_min;
         ball->vx = -ball->vx;
@@ -52,8 +47,6 @@ void updateBall(Ball *ball, Boarder *Boarder) {
         ball->x = Boarder->x_max;
         ball->vx = -ball->vx;
     }
-
-    // 检查并修正y方向的边界碰撞
     if (ball->y <= Boarder->y_min) {
         ball->y = Boarder->y_min;
         ball->vy = -ball->vy;

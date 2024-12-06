@@ -38,9 +38,9 @@ extern int d;
 int init_yleft = 100;
 int y_bias = 120;
 int now_yleft;
-int moving_step = 20;
 int MAX_POS = 199;
-
+int moving_step = 20;
+int bullet_velocity = 5;
 Ball ball;
 Boarder boarder;
 
@@ -55,23 +55,15 @@ void drawHLineColor(uint32_t color, int x, int y, int length) {
     drawHLine(x, y, length);
 }
 
-void Init_game(){
-	init_ball_pixel_counts();
-	Init_Bricks();
-}
 void init_ball_pixel_counts() {
 	for (int r = 1; r <= MAX_RADIUS; r++) {
 	        for (int dy = -r; dy <= r; dy++) {
 	            int dx_limit_squared = r * r - dy * dy;
 	            int dx_limit = 0;
-
-	            // 计算水平范围，避免浮点运算
 	            while (dx_limit * dx_limit <= dx_limit_squared) {
 	                dx_limit++;
 	            }
-	            dx_limit--; // 回退一步，找到最大的有效整数 dx_limit
-
-	            // 存储像素点数量（每行总长度）
+	            dx_limit--;
 	            ball_pixel_counts[r][dy + r] = 2 * dx_limit + 1;
 	        }
 	    }
@@ -87,63 +79,7 @@ void draw_ball(Ball *ball) {
     former_y = ball->y;
 }
 
-//void DrawBorder() {
-//	for (int width = 0; width<6;width++) {
-//		drawHLine(0, width, DISP_X_SIZE);
-//		drawHLine(0, DISP_Y_SIZE-width-10, DISP_X_SIZE);
-//		drawVLine(width, 0, DISP_Y_SIZE);
-//		drawVLine(DISP_X_SIZE-width, 0, DISP_Y_SIZE);
-//	}
-//}
-//void Set_Blue(){
-//	for (int Row = 0; Row<8; Row++) {
-//		int NewRow = Row*40;
-//		for (int Col = 0; Col<6; Col++) {
-//			int NewCol = Col*40;
-//			for (int y = 0; y<40; y++) {
-//				int blue = 2*ceil(y/2);
-//				setColor(0,255,255);
-//				drawHLine(0+NewCol, y+NewRow, 20-(blue/2));
-//				setColor(0, 0, 255);
-//				drawHLine(20-(blue/2)+NewCol, y+NewRow, blue);
-//				setColor(0,255,255);
-//				drawHLine(20+(blue/2)+NewCol, y+NewRow, 20-(blue/2));
-//			}
-//		}
-//	}
-//}
-//void Tmr_Set_Blue(void){
-//	for (int Row = 1; Row<3; Row++) {
-//		int NewRow = Row*40;
-//		for (int Col = 0; Col<6; Col++) {
-//			int NewCol = Col*40;
-//			for (int y = 0; y<40; y++) {
-//				int blue = 2*ceil(y/2);
-//				setColor(0,255,255);
-//				drawHLine(0+NewCol, y+NewRow, 20-(blue/2));
-//				setColor(0, 0, 255);
-//				drawHLine(20-(blue/2)+NewCol, y+NewRow, blue);
-//				setColor(0,255,255);
-//				drawHLine(20+(blue/2)+NewCol, y+NewRow, 20-(blue/2));
-//			}
-//		}
-//	}
-//}
-//void Txt_Set_BLUE(void) {
-//		int NewRow = 3*40;
-//		for (int Col = 0; Col<6; Col++) {
-//			int NewCol = Col*40;
-//			for (int y = 0; y<40; y++) {
-//				int blue = 2*ceil(y/2);
-//				setColor(0,255,255);
-//				drawHLine(0+NewCol, y+NewRow, 20-(blue/2));
-//				setColor(0, 0, 255);
-//				drawHLine(20-(blue/2)+NewCol, y+NewRow, blue);
-//				setColor(0,255,255);
-//				drawHLine(20+(blue/2)+NewCol, y+NewRow, 20-(blue/2));
-//		}
-//	}
-//}
+
 void dspl_init(){
 	//         ↓start here       ↓max display length if start from y=20
 	DisplText("Welcome to ez game"  , 1,220,0,  BigFont);
@@ -152,7 +88,7 @@ void dspl_init(){
 	DisplText("START GAME"	        , 1,140,80, SmallFont);
 	DisplText("Settings"            , 1,120,80, SmallFont);
 }
-DisplInt(int a, int rotated,int x,int y,u8* font){
+void DisplInt(int a, int rotated,int x,int y,u8* font){
 	char buffer[16];
 	sprintf(buffer, "%d", a);
 	DisplText(buffer,rotated,x,y,font);
@@ -161,16 +97,17 @@ void dspl_Settings(){
 
 	DisplText("Settings"            , 1,220,0,  BigFont);
 	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks or Board"     , 1,180,200, SmallFont);
-	DisplText("Bricks Num"          , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
-	DisplText("Bullet size"         , 1,140,60, SmallFont);
-	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);
-	DisplText("Board Velocity"      , 1,100,60, SmallFont);
+	DisplText("Bricks Num(max 8)"   , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
+	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,160,200, SmallFont);
+	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,160,200, SmallFont);
+	DisplText("Board Velocity"      , 1,100,60, SmallFont);  DisplInt(moving_step            , 1,160,200, SmallFont);
 }
-void dspl_game_Init() {
+void Game_Init() {
+	init_ball_pixel_counts();
+	Init_Bricks();
     fillRectColor(COLOR_BG, 0, 0, 239, 319);
     initBall(&ball, 10, 10, -10, -8, 5);
     set_boarder(&ball, &boarder);
-    btn_init_game();
 }
 
 void erase_former(int former_x, int former_y, int r) {
