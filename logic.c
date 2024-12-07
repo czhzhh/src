@@ -17,6 +17,7 @@
 #include "lcd.h"
 #include <stdio.h>
 #include "logic.h"
+#include "lab2b.h"
 
 #define MAX_RADIUS 20
 
@@ -55,3 +56,42 @@ void updateBall(Ball *ball, Boarder *Boarder) {
         ball->vy = -ball->vy;
     }
 }
+
+/*
+ * Use this function in updateBall when you need to update the speed of x
+ * return 0: game continues
+ * return 1: game over
+ */
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode) {
+    if (!currentMode) {
+    	xil_printf("currentPositionY %d",currentPositionY);
+    	xil_printf("now_yleft %d",now_yleft);
+    	xil_printf("now_yleft+ y_bias %d",now_yleft+ y_bias);
+        return (currentPositionY >= now_yleft && currentPositionY <= now_yleft + y_bias) ? 0 : 1;
+    } else {
+        int returnValue = 1;
+//        for (int i = 0; i < BRICKS_COUNT; i++) {
+//        	xil_printf("%d",Brck_Pos[i][1]);
+//            if (currentPositionY >= Brck_Pos[i][1] && currentPositionY <= Brck_Pos[i][3]) {
+//                returnValue = 0;
+//                break;
+//            }
+//        }
+        if (count > 0) {
+			for (int i = 0; i < count; i++) {
+				int index = positions[i];
+				//xil_printf("index %d\n\r",index);
+				xil_printf("currentPositionY %d\n\r",currentPositionY);
+				xil_printf("Brck_Pos[index][1] %d\n\r",Brck_Pos[index][1]);
+				xil_printf("Brck_Pos[index][3] %d\n\r",Brck_Pos[index][3]);
+				if (currentPositionY >= Brck_Pos[index][1] && currentPositionY <= Brck_Pos[index][3]) {
+					returnValue = 0;
+					break;
+				}
+			}
+		}
+        return returnValue;
+    }
+}
+
+

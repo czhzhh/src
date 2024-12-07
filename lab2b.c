@@ -28,7 +28,7 @@ typedef struct Lab2BTag  {               //Lab2B State machine
  volatile int d=0;
 
 
-int currentMode = 0;
+int currentMode = 1;
 int initPlotVar = 0;
 int setChangeFlag = 0;
 
@@ -59,8 +59,8 @@ QState fsm_on_start(Lab2B *me) {
             xil_printf("rendering init screen fsm_on_start\n\r");
             // set init
             // vx = rand(bullet_velocity)
-            int vx = 3;
-            int vy = 4;
+            int vx = 6;
+            int vy = 8;
             initBall(&ball, 220, 160, vx, vy, 5);
             // plot init frame(choose level and start game)
             dspl_init();
@@ -191,6 +191,11 @@ QState fsm_SW(Lab2B *me) {
         case TICK_SIG: {
 			// calculateNewPosition();
             // changePosition();
+        	if(ball.x <= boarder.x_min){
+				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos[16][4], valid_sw, currentMode)){
+					return Q_TRAN(&fsm_over);
+				}
+			}
             update();
             // int gameover
             // if(gameover){
@@ -234,6 +239,11 @@ QState fsm_Btn(Lab2B *me) {
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
+        	if(ball.x <= boarder.x_min){
+        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos[16][4], valid_sw, currentMode)){
+					return Q_TRAN(&fsm_over);
+				}
+        	}
             update();
             // int gameover
             // if(gameover){
@@ -273,10 +283,13 @@ QState fsm_over(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_over\n\r");
-            displayEnd();
+            //displayEnd();
             return Q_HANDLED();
         }
         case GameOn: {
+        	int vx = 6;
+        	int vy = 8;
+        	initBall(&ball, 220, 160, vx, vy, 5);
         	dspl_init();
             return Q_TRAN(&fsm_on_start);
         }

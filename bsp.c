@@ -170,7 +170,10 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
     uint32_t temp = value;
     while (temp) {
         int pos = __builtin_ctz(temp);
-        positions[count++] = 15 - pos;
+        if(pos <=15&&pos >=0){
+        	positions[count++] = 15 - pos;
+        	xil_printf("positions[count++] %d\n\r",15 - pos);
+        }
         temp &= (temp - 1);
     }
     return totalBits;
@@ -182,6 +185,7 @@ void SWHandler(void *CallbackRef) {
     XGpio *GpioPtr = (XGpio *)CallbackRef;
     XGpio_InterruptClear(GpioPtr, SW_CHANNEL);
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+    //here should be a variable
     init_positions(5);
     count = analyzeBits(ButtonPressStatus, valid_sw, positions);
     QActive_postISR((QActive *)&l2b,BoardsChange);
