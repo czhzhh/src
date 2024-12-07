@@ -19,10 +19,10 @@
 
 
 #define MAX_RADIUS 20
-#define BRICKS_COUNT 16
+
 #define BRICK_HEIGHT 18
 #define BRICK_GAP 1
-#define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP) // Ã¿×©¿éÕ¼ÓÃµÄ×Ü¸ß¶È
+#define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP) // Ã¿×©ï¿½ï¿½Õ¼ï¿½Ãµï¿½ï¿½Ü¸ß¶ï¿½
 #define BRICK_WIDTH 8
 #define SCREEN_HEIGHT 319
 #define BAR_WIDTH 8
@@ -81,7 +81,7 @@ void draw_ball(Ball *ball) {
 
 
 void dspl_init(){
-	//         ¡ýstart here       ¡ýmax display length if start from y=20
+	//         ï¿½ï¿½start here       ï¿½ï¿½max display length if start from y=20
 	DisplText("Welcome to ez game"  , 1,220,0,  BigFont);
 	DisplText("Made by:"            , 1,200,4,  SmallFont);
 	DisplText("Jiaji & Zhaohongzhi" , 1,180,8,  SmallFont);
@@ -106,7 +106,7 @@ void Game_Init() {
 	init_ball_pixel_counts();
 	Init_Bricks();
     fillRectColor(COLOR_BG, 0, 0, 239, 319);
-    initBall(&ball, 10, 10, -10, -8, 5);
+    //initBall(&ball, 10, 10, -10, -8, 5);
     set_boarder(&ball, &boarder);
 }
 
@@ -135,6 +135,7 @@ void Init_Bricks(void) {
 
 void Bricks(int count, int *positions) {
     fillRectColor(COLOR_BG, 0, 0, 8, 319);
+    xil_printf("count in Bricks %d\r\n",count);
     if (count > 0) {
         for (int i = 0; i < count; i++) {
             int index = positions[i];
@@ -185,13 +186,13 @@ void btn_mov_r() {
 }
 
 void DisplText(char *s1, int rotated,int x,int y,u8* font) {
-    setColor(0, 255, 0);         // ÉèÖÃÇ°¾°ÑÕÉ«
-    setColorBg(0, 0, 255);      // ÉèÖÃ±³¾°ÑÕÉ«
+    setColor(0, 255, 0);         // ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½É«
+    setColorBg(0, 0, 255);      // ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½É«
     setFont(font);               //SmallFont/BigFont/SevenSegNumFont
     if (rotated) {
-        lcdPrintRotated(s1, x, y); // Ðý×ª 90 ¶È´òÓ¡
+        lcdPrintRotated(s1, x, y); // ï¿½ï¿½×ª 90 ï¿½È´ï¿½Ó¡
     } else {
-        lcdPrint(s1, 75, 140);        // Ä¬ÈÏË®Æ½´òÓ¡
+        lcdPrint(s1, 75, 140);        // Ä¬ï¿½ï¿½Ë®Æ½ï¿½ï¿½Ó¡
     }
 }
 

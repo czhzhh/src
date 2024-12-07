@@ -27,7 +27,7 @@ enum Lab2BSignals {
 
 
 extern struct Lab2BTag l2b;
-
+extern int curentMode;
 void Lab2B_ctor(void);
  void GpioHandler(void *CallbackRef);
  void TwistHandler(void *CallbackRef);

@@ -10,7 +10,7 @@
 #include "displayer.h"
 #include <math.h>
 #include "xil_printf.h"
-
+#include "logic.h"
 
 
 typedef struct Lab2BTag  {               //Lab2B State machine
@@ -28,7 +28,7 @@ typedef struct Lab2BTag  {               //Lab2B State machine
  volatile int d=0;
 
 
-int currentMode = 0;
+int currentMode = 1;
 int initPlotVar = 0;
 int setChangeFlag = 0;
 
@@ -57,13 +57,10 @@ QState fsm_on_start(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             xil_printf("rendering init screen fsm_on_start\n\r");
-            // set init
-            // vx = rand(bullet_velocity)
-            int vx = 3;
-            int vy = 4;
+            int vx = 6;
+            int vy = 8;
             initBall(&ball, 220, 160, vx, vy, 5);
             // plot init frame(choose level and start game)
-            dspl_init();
             return Q_HANDLED();
         }
         case TICK_SIG: {
@@ -189,20 +186,17 @@ QState fsm_SW(Lab2B *me) {
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
-			// calculateNewPosition();
-            // changePosition();
+        	if(ball.x <= boarder.x_min){
+				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode)){
+					return Q_TRAN(&fsm_over);
+				}
+			}
             update();
-            // int gameover
-            // if(gameover){
-            // 	xil_printf("game over\n\r");
-			// 	return Q_TRAN(&fsm_over);
-
-            // }
 			return Q_HANDLED();
 		}
         case BoardsChange: {
+        	xil_printf("message sent\r\n");
             Bricks(count,positions);
-            free_positions();
             return Q_HANDLED();
         }
         case GameOn: {
@@ -234,12 +228,12 @@ QState fsm_Btn(Lab2B *me) {
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
+        	if(ball.x <= boarder.x_min){
+        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode)){
+					return Q_TRAN(&fsm_over);
+				}
+        	}
             update();
-            // int gameover
-            // if(gameover){
-            // 	xil_printf("game over\n\r");
-			// 	return Q_TRAN(&fsm_over);
-            // }
 			return Q_HANDLED();
 		}
         case BoardsChange: {
@@ -273,10 +267,14 @@ QState fsm_over(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_over\n\r");
-            displayEnd();
+            //displayEnd();
             return Q_HANDLED();
         }
         case GameOn: {
+        	clrScr();
+        	int vx = 6;
+        	int vy = 8;
+        	initBall(&ball, 220, 160, vx, vy, 5);
         	dspl_init();
             return Q_TRAN(&fsm_on_start);
         }

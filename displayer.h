@@ -24,7 +24,14 @@ void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2);
 void DisplText(char *s1, int rotated,int x,int y,u8* font);
 void Game_Init();
 
+#define BRICKS_COUNT 16
+
 extern int moving_step;
 extern int bullet_velocity;
 extern Ball ball;
+extern int Brck_Pos[BRICKS_COUNT][4];
+extern int y_bias;
+extern int now_yleft;
+extern int init_yleft;
+extern Boarder boarder;
 #endif

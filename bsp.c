@@ -130,6 +130,7 @@ void QF_onStartup(void) {                 /* entered with interrupts locked */
 	xil_printf("QF_onStartup\n"); // Comment out once you are in your complete program
 	initLCD();
 	clrScr();
+    dspl_init();
 }
 void QF_onIdle(void) {QF_INT_UNLOCK();}
 
@@ -163,14 +164,17 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
     value &= 0xFFFF;
     int totalBits = __builtin_popcount(value);
     if (totalBits > valid_sw) {
-        memset(positions, 0, valid_sw * sizeof(int));
+//    	xil_printf("analyzing Bits");
+//        memset(positions, 0, valid_sw * sizeof(int));
         return 0;
     }
     int count = 0;
     uint32_t temp = value;
     while (temp) {
         int pos = __builtin_ctz(temp);
-        positions[count++] = 15 - pos;
+        if(pos <=15&&pos >=0){
+        	positions[count++] = 15 - pos;
+        }
         temp &= (temp - 1);
     }
     return totalBits;
@@ -182,6 +186,7 @@ void SWHandler(void *CallbackRef) {
     XGpio *GpioPtr = (XGpio *)CallbackRef;
     XGpio_InterruptClear(GpioPtr, SW_CHANNEL);
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
+    //here should be a variable
     init_positions(5);
     count = analyzeBits(ButtonPressStatus, valid_sw, positions);
     QActive_postISR((QActive *)&l2b,BoardsChange);

@@ -17,6 +17,7 @@
 #include "lcd.h"
 #include <stdio.h>
 #include "logic.h"
+#include "lab2b.h"
 
 #define MAX_RADIUS 20
 
@@ -53,5 +54,28 @@ void updateBall(Ball *ball, Boarder *Boarder) {
     } else if (ball->y >= Boarder->y_max) {
         ball->y = Boarder->y_max;
         ball->vy = -ball->vy;
+    }
+}
+
+/*
+ * Use this function in updateBall when you need to update the speed of x
+ * return 0: game continues
+ * return 1: game over
+ */
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode) {
+    if (!currentMode) {
+        return (currentPositionY >= now_yleft && currentPositionY <= now_yleft + y_bias) ? 0 : 1;
+    } else {
+        int returnValue = 1;
+        if (count > 0) {
+			for (int i = 0; i < count; i++) {
+				int index = positions[i];
+				if (currentPositionY >= Brck_Pos[index][1] && currentPositionY <= Brck_Pos[index][3]) {
+					returnValue = 0;
+					break;
+				}
+			}
+		}
+        return returnValue;
     }
 }
