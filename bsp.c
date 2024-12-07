@@ -130,6 +130,7 @@ void QF_onStartup(void) {                 /* entered with interrupts locked */
 	xil_printf("QF_onStartup\n"); // Comment out once you are in your complete program
 	initLCD();
 	clrScr();
+    dspl_init();
 }
 void QF_onIdle(void) {QF_INT_UNLOCK();}
 
@@ -163,7 +164,8 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
     value &= 0xFFFF;
     int totalBits = __builtin_popcount(value);
     if (totalBits > valid_sw) {
-        memset(positions, 0, valid_sw * sizeof(int));
+//    	xil_printf("analyzing Bits");
+//        memset(positions, 0, valid_sw * sizeof(int));
         return 0;
     }
     int count = 0;
@@ -172,7 +174,6 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
         int pos = __builtin_ctz(temp);
         if(pos <=15&&pos >=0){
         	positions[count++] = 15 - pos;
-        	xil_printf("positions[count++] %d\n\r",15 - pos);
         }
         temp &= (temp - 1);
     }

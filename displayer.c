@@ -135,10 +135,10 @@ void Init_Bricks(void) {
 
 void Bricks(int count, int *positions) {
     fillRectColor(COLOR_BG, 0, 0, 8, 319);
+    xil_printf("count in Bricks %d\r\n",count);
     if (count > 0) {
         for (int i = 0; i < count; i++) {
             int index = positions[i];
-            xil_printf("index %d\r\n",index);
             fillRectColor(COLOR_BAR, Brck_Pos[index][0], Brck_Pos[index][1],
                          Brck_Pos[index][2], Brck_Pos[index][3]);
         }
