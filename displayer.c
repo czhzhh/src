@@ -79,6 +79,12 @@ void draw_ball(Ball *ball) {
     former_y = ball->y;
 }
 
+void draw_arrow_init(){
+
+}
+void draw_arrow_settings(){
+
+}
 
 void dspl_init(){
 	//         ��start here       ��max display length if start from y=20
@@ -196,3 +202,7 @@ void DisplText(char *s1, int rotated,int x,int y,u8* font) {
     }
 }
 
+
+void dspl_end(){
+    //end frame
+}

@@ -267,7 +267,7 @@ QState fsm_over(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_over\n\r");
-            //displayEnd();
+            dspl_end();
             return Q_HANDLED();
         }
         case GameOn: {

@@ -23,7 +23,9 @@ void btn_mov_r();
 void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2);
 void DisplText(char *s1, int rotated,int x,int y,u8* font);
 void Game_Init();
-
+void dspl_end();
+void draw_arrow_init();
+void draw_arrow_settings();
 #define BRICKS_COUNT 16
 
 extern int moving_step;
