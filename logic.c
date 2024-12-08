@@ -64,6 +64,7 @@ void updateBall(Ball *ball, Boarder *Boarder) {
  */
 int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode) {
     if (!currentMode) {
+        // change vx vy when game continues
         return (currentPositionY >= now_yleft && currentPositionY <= now_yleft + y_bias) ? 0 : 1;
     } else {
         int returnValue = 1;
@@ -71,6 +72,7 @@ int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_P
 			for (int i = 0; i < count; i++) {
 				int index = positions[i];
 				if (currentPositionY >= Brck_Pos[index][1] && currentPositionY <= Brck_Pos[index][3]) {
+                    // change vx vy
 					returnValue = 0;
 					break;
 				}
