@@ -17,14 +17,6 @@ typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
 } Lab2B;
 
- int act_volume = 0;
- int stored_value = 0;
- int Mute = 0;
- int MainVolumeState = 0;
- int VolumeState = 0;
- int MainTextState = 0;
- int TextState = 0;
- int last_vol=0;
  volatile int d=0;
 
 
@@ -60,7 +52,6 @@ QState fsm_on_start(Lab2B *me) {
             int vx = 6;
             int vy = 8;
             initBall(&ball, 220, 160, vx, vy, 5);
-            // plot init frame(choose level and start game)
             return Q_HANDLED();
         }
         case TICK_SIG: {
@@ -69,13 +60,13 @@ QState fsm_on_start(Lab2B *me) {
         case ChangeLevelUp: {
             xil_printf("change mode up\n\r");
             initPlotVar = !initPlotVar;
-            //dspl_init();
+            draw_arrow_init();
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
             xil_printf("change mode down\n\r");
             initPlotVar = !initPlotVar;
-            //dspl_init();
+            draw_arrow_init();
             return Q_HANDLED();
         }
         case GameOn: {
@@ -123,50 +114,29 @@ QState fsm_Setting(Lab2B *me) {
         }
         case ChangeLevelUp: {
             xil_printf("change mode up\n\r");
-            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag + 1;
-            // plot the arrow
+            setChangeFlag = (setChangeFlag == 0) ? 4 : setChangeFlag - 1;
+            draw_arrow_settings();
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
             xil_printf("change mode down\n\r");
-            setChangeFlag = (setChangeFlag == 0) ? 4 : setChangeFlag - 1;
-            // plot the arrow
+            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag + 1;
+            draw_arrow_settings();
             return Q_HANDLED();
         }
         case GameOn: {
             xil_printf("back to begining\n\r");
+            dspl_init();
             return Q_TRAN(&fsm_on_start);
         }
         case B_L: {
             // change paras according to setChangeFlag
-        	switch(setChangeFlag){
-        	case 0:
-        		currentMode!=currentMode;
-        	case 1:
-        		valid_sw = (valid_sw == 1) ? 1 : valid_sw - 1;
-        	case 2:
-        		ball.radius = (ball.radius == 1) ? 1 : ball.radius - 1;
-        	case 3:
-        		bullet_velocity = (bullet_velocity == 5) ? 5 : bullet_velocity - 1;
-        	case 4:
-        		moving_step = (moving_step == 5) ? 5 : moving_step - 1;
-        	}
+            downbtn_setting_change(&ball, moving_step);
 			return Q_HANDLED();
 		}
         case B_R: {
             // change paras according to setChangeFlag
-        	switch(setChangeFlag){
-        	case 0:
-        		currentMode!=currentMode;
-        	case 1:
-        		valid_sw = (valid_sw == 8) ? 8 : valid_sw + 1;
-        	case 2:
-        		ball.radius = (ball.radius == 20) ? 20 : ball.radius + 1;
-        	case 3:
-        		bullet_velocity = (bullet_velocity == 20) ? 20 : bullet_velocity + 1;
-        	case 4:
-        		moving_step = (moving_step == 20) ? 20 : moving_step + 1;
-        	}
+            upbtn_setting_change(&ball, moving_step);
 			return Q_HANDLED();
 		}
         case BoardsChange: {
@@ -200,6 +170,7 @@ QState fsm_SW(Lab2B *me) {
             return Q_HANDLED();
         }
         case GameOn: {
+
             return Q_HANDLED();
         }
         case ChangeLevelUp: {

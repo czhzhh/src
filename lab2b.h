@@ -28,6 +28,10 @@ enum Lab2BSignals {
 
 extern struct Lab2BTag l2b;
 extern int curentMode;
+extern int initPlotVar;
+extern int setChangeFlag;
+extern int currentMode;
+
 void Lab2B_ctor(void);
  void GpioHandler(void *CallbackRef);
  void TwistHandler(void *CallbackRef);

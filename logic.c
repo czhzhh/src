@@ -57,6 +57,59 @@ void updateBall(Ball *ball, Boarder *Boarder) {
     }
 }
 
+void upbtn_setting_change(Ball *ball, int moving_step){
+	if(setChangeFlag==0){
+		if(currentMode){
+			//switch
+		}
+		else{
+			//board
+		}
+	}
+	else if(setChangeFlag==1){
+		valid_sw = (valid_sw == 8) ? 8 : valid_sw + 1;
+	}
+	else if(setChangeFlag==2){
+		ball->radius=(ball->radius==MAX_RADIUS) ? MAX_RADIUS : ball->radius+1;
+	}
+	else if(setChangeFlag==3){
+		//v=(v<=MAX_V) ? MAX_V : v+1;
+	}
+	else if(setChangeFlag==4){
+		moving_step=(moving_step==30) ? 30 : moving_step+1;
+		DisplInt(moving_step            , 1,100,200, SmallFont);
+	}
+//	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks or Board"     , 1,180,200, SmallFont);
+//	DisplText("Bricks(max 8)"       , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
+//	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,140,200, SmallFont);
+//	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,120,200, SmallFont);
+//	DisplText("Board Velocity"      , 1,100,60, SmallFont);
+}
+
+void downbtn_setting_change(Ball *ball, int moving_step){
+	if(setChangeFlag==0){
+		if(currentMode){
+			//switch
+		}
+		else{
+			//board
+		}
+	}
+	else if(setChangeFlag==1){
+		valid_sw = (valid_sw == 1) ? 1 : valid_sw - 1;
+	}
+	else if(setChangeFlag==2){
+		ball->radius=(ball->radius==3) ? 3 : ball->radius-1;
+	}
+	else if(setChangeFlag==3){
+		//v=(v<=MIN_V) ? MIN_V : v-1;
+	}
+	else if(setChangeFlag==4){
+		moving_step=(moving_step==5) ? 5 : moving_step-1;
+	}
+}
+
+
 /*
  * Use this function in updateBall when you need to update the speed of x
  * return 0: game continues

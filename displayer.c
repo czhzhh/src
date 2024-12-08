@@ -26,10 +26,11 @@
 #define BRICK_WIDTH 8
 #define SCREEN_HEIGHT 319
 #define BAR_WIDTH 8
-#define COLOR_BAR 0xFF0000    // bar color
-#define COLOR_BG  0x228B22    // background color
-#define COLOR_BALL   0x8A2BE2    //ball color (138, 43, 226)
-
+#define COLOR_BAR     0xFF0000   // bar color
+#define COLOR_BG      0x228B22   //game background color
+#define COLOR_BALL    0x8A2BE2   //ball color (138, 43, 226)
+#define COLOR_INIT_BG 0x0000FF   //init background gold (255, 215, 0)
+//0xFFD700
 int Brck_Pos[BRICKS_COUNT][4];
 int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
 int former_x=0;
@@ -80,19 +81,42 @@ void draw_ball(Ball *ball) {
 }
 
 void draw_arrow_init(){
-
+	if(initPlotVar==0){
+		fillRectColor(COLOR_INIT_BG, 110, 60, 120, 75);
+		DisplText("->"              ,1,140,60,  SmallFont);
+	}
+	else{
+		fillRectColor(COLOR_INIT_BG, 130, 60, 140, 75);
+		DisplText("->"              ,1,120,60,  SmallFont);
+	}
 }
 void draw_arrow_settings(){
-
+	fillRectColor(COLOR_INIT_BG, 80, 40, 180, 55);
+	if(setChangeFlag==0){
+		DisplText("->"              ,1,180,40,  SmallFont);
+	}
+	else if(setChangeFlag==1){
+		DisplText("->"              ,1,160,40,  SmallFont);
+	}
+	else if(setChangeFlag==2){
+		DisplText("->"              ,1,140,40,  SmallFont);
+	}
+	else if(setChangeFlag==3){
+		DisplText("->"              ,1,120,40,  SmallFont);
+	}
+	else if(setChangeFlag==4){
+		DisplText("->"              ,1,100,40,  SmallFont);
+	}
 }
 
 void dspl_init(){
-	//         ��start here       ��max display length if start from y=20
+	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
 	DisplText("Welcome to ez game"  , 1,220,0,  BigFont);
 	DisplText("Made by:"            , 1,200,4,  SmallFont);
 	DisplText("Jiaji & Zhaohongzhi" , 1,180,8,  SmallFont);
 	DisplText("START GAME"	        , 1,140,80, SmallFont);
 	DisplText("Settings"            , 1,120,80, SmallFont);
+	draw_arrow_init();
 }
 void DisplInt(int a, int rotated,int x,int y,u8* font){
 	char buffer[16];
@@ -100,13 +124,14 @@ void DisplInt(int a, int rotated,int x,int y,u8* font){
 	DisplText(buffer,rotated,x,y,font);
 }
 void dspl_Settings(){
-
+	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
 	DisplText("Settings"            , 1,220,0,  BigFont);
-	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks or Board"     , 1,180,200, SmallFont);
-	DisplText("Bricks Num(max 8)"   , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
-	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,160,200, SmallFont);
-	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,160,200, SmallFont);
-	DisplText("Board Velocity"      , 1,100,60, SmallFont);  DisplInt(moving_step            , 1,160,200, SmallFont);
+	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks/Board"     , 1,180,200, SmallFont);
+	DisplText("Bricks(max 8)"       , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
+	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,140,200, SmallFont);
+	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,120,200, SmallFont);
+	DisplText("Board Velocity"      , 1,100,60, SmallFont);  DisplInt(moving_step            , 1,100,200, SmallFont);
+	draw_arrow_settings();
 }
 void Game_Init() {
 	init_ball_pixel_counts();
@@ -192,16 +217,15 @@ void btn_mov_r() {
 }
 
 void DisplText(char *s1, int rotated,int x,int y,u8* font) {
-    setColor(0, 255, 0);         // ����ǰ����ɫ
-    setColorBg(0, 0, 255);      // ���ñ�����ɫ
+    setColor(0, 255, 0);
+    setColorBg(0, 0, 255);
     setFont(font);               //SmallFont/BigFont/SevenSegNumFont
     if (rotated) {
-        lcdPrintRotated(s1, x, y); // ��ת 90 �ȴ�ӡ
+        lcdPrintRotated(s1, x, y);
     } else {
-        lcdPrint(s1, 75, 140);        // Ĭ��ˮƽ��ӡ
+        lcdPrint(s1, 75, 140);
     }
 }
-
 
 void dspl_end(){
     //end frame

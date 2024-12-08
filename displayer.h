@@ -26,6 +26,7 @@ void Game_Init();
 void dspl_end();
 void draw_arrow_init();
 void draw_arrow_settings();
+
 #define BRICKS_COUNT 16
 
 extern int moving_step;
