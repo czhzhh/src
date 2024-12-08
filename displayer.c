@@ -42,6 +42,7 @@ int now_yleft;
 int MAX_POS = 199;
 int moving_step = 20;
 int bullet_velocity = 5;
+int score = 0;
 Ball ball;
 Boarder boarder;
 
@@ -229,4 +230,8 @@ void DisplText(char *s1, int rotated,int x,int y,u8* font) {
 
 void dspl_end(){
     //end frame
+	DisplText("Game Over"							, 1,140,90,  BigFont);
+	DisplText("your score is"						, 1,100,90, SmallFont);
+	DisplInt(score									, 1,100,220, SmallFont);
+	DisplText("press OK button to start new game"	, 1,80,30, SmallFont);
 }

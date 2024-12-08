@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include "logic.h"
 #include "lab2b.h"
-
 #define MAX_RADIUS 20
 
 void initBall(Ball *ball, int x, int y, int vx, int vy, int radius) {
@@ -43,7 +42,7 @@ void updateBall(Ball *ball, Boarder *Boarder) {
 
     if (ball->x <= Boarder->x_min) {
         ball->x = Boarder->x_min;
-        ball->vx = -ball->vx;
+        //ball->vx = -ball->vx;
     } else if (ball->x >= Boarder->x_max) {
         ball->x = Boarder->x_max;
         ball->vx = -ball->vx;
@@ -115,9 +114,9 @@ void downbtn_setting_change(Ball *ball, int moving_step){
  * return 0: game continues
  * return 1: game over
  */
-int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode) {
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score) {
     if (!currentMode) {
-        // change vx vy when game continues
+    	// score updated in lab2b.c
         return (currentPositionY >= now_yleft && currentPositionY <= now_yleft + y_bias) ? 0 : 1;
     } else {
         int returnValue = 1;
@@ -125,7 +124,6 @@ int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_P
 			for (int i = 0; i < count; i++) {
 				int index = positions[i];
 				if (currentPositionY >= Brck_Pos[index][1] && currentPositionY <= Brck_Pos[index][3]) {
-                    // change vx vy
 					returnValue = 0;
 					break;
 				}
@@ -134,3 +132,30 @@ int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_P
         return returnValue;
     }
 }
+
+void regenerateSpeed(int *vx, int *vy){
+	int speed_squared = *vx * *vx + *vy * *vy;
+	double speed = sqrt(speed_squared);
+	double max_bias = 0.25 * fabs(*vx);
+	double x = rand()%10;
+	double bias = (2*x/10-1) * max_bias;
+	printf("and()10 %f\r\n",x);
+	printf("bias %f\r\n",bias);
+	double vx1 = (double)*vx;
+	double vy1 = (double)*vy;
+	vx1 += bias;
+	double vx_squared = vx1 * vx1;
+	if (vx_squared > speed_squared) {
+		vx1 = copysign(speed, vx1);
+		vx_squared = speed_squared - 1;
+	}
+	double vy_squared = speed_squared - vx_squared;
+	vy_squared = fmax(vy_squared, 25.0);
+	vy1 = copysign(sqrt(vy_squared), vy1);
+	*vy = (int)lround(vy1);
+	*vx = -(int)fmin(lround(vx1), -5.0);
+}
+
+
+
+
