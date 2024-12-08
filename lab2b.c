@@ -11,7 +11,9 @@
 #include <math.h>
 #include "xil_printf.h"
 #include "logic.h"
-
+#include <stdlib.h>
+#include <time.h>
+#include <float.h>
 
 typedef struct Lab2BTag  {               //Lab2B State machine
 	QActive super;
@@ -49,6 +51,7 @@ QState fsm_on_start(Lab2B *me) {
     switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
             xil_printf("rendering init screen fsm_on_start\n\r");
+            score = 0;
             int vx = 6;
             int vy = 8;
             initBall(&ball, 220, 160, vx, vy, 5);
@@ -157,9 +160,12 @@ QState fsm_SW(Lab2B *me) {
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode)){
-					return Q_TRAN(&fsm_over);
+				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
+					//return Q_TRAN(&fsm_over);
 				}
+				score += 5*(6-count);
+				regenerateSpeed(&ball.vx, &ball.vy);
+				xil_printf("ball vx in SW%d",ball.vx);
 			}
             update();
 			return Q_HANDLED();
@@ -200,9 +206,11 @@ QState fsm_Btn(Lab2B *me) {
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode)){
+        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
 					return Q_TRAN(&fsm_over);
 				}
+        		score += 10;
+        		regenerateSpeed(&ball.vx, &ball.vy);
         	}
             update();
 			return Q_HANDLED();
@@ -243,6 +251,7 @@ QState fsm_over(Lab2B *me) {
         }
         case GameOn: {
         	clrScr();
+        	score = 0;
         	int vx = 6;
         	int vy = 8;
         	initBall(&ball, 220, 160, vx, vy, 5);

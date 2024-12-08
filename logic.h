@@ -24,5 +24,6 @@ void set_boarder(Ball *ball, Boarder *Boarder);
 void updateBall(Ball *ball, Boarder *Boarder);
 void upbtn_setting_change(Ball *ball, int moving_step);
 void downbtn_setting_change(Ball *ball, int moving_step);
-extern int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode);
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score);
+void regenerateSpeed(int *vx, int *vy);
 #endif // LOGIC_H

@@ -36,5 +36,6 @@ extern int Brck_Pos[BRICKS_COUNT][4];
 extern int y_bias;
 extern int now_yleft;
 extern int init_yleft;
+extern int score;
 extern Boarder boarder;
 #endif
