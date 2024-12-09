@@ -22,7 +22,7 @@
 #include "xspi_l.h"
 #include "lcd.h"
 #include "displayer.h"
-
+#include <unistd.h>
 
 
 
@@ -182,14 +182,15 @@ int analyzeBits(uint32_t value, int valid_sw, int *positions) {
 
 
 void SWHandler(void *CallbackRef) {
-    // Increment A counter
     XGpio *GpioPtr = (XGpio *)CallbackRef;
     XGpio_InterruptClear(GpioPtr, SW_CHANNEL);
     Xuint32 ButtonPressStatus = XGpio_DiscreteRead(&sw, SW_CHANNEL);
-    //here should be a variable
-    init_positions(5);
-    count = analyzeBits(ButtonPressStatus, valid_sw, positions);
-    QActive_postISR((QActive *)&l2b,BoardsChange);
+    usleep(1000);
+    if (ButtonPressStatus == XGpio_DiscreteRead(&sw, SW_CHANNEL)) {
+        init_positions(5);
+        count = analyzeBits(ButtonPressStatus, valid_sw, positions);
+        QActive_postISR((QActive *)&l2b, BoardsChange);
+    }
 }
 
 void GpioHandler(void *CallbackRef) {

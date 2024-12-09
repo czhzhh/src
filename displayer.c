@@ -16,7 +16,7 @@
 #include "displayer.h"
 #include "lcd.h"
 #include "logic.h"
-
+#include "image.h"
 
 #define MAX_RADIUS 20
 
@@ -29,7 +29,7 @@
 #define COLOR_BAR     0xFF0000   // bar color
 #define COLOR_BG      0x228B22   //game background color
 #define COLOR_BALL    0x8A2BE2   //ball color (138, 43, 226)
-#define COLOR_INIT_BG 0x0000FF   //init background gold (255, 215, 0)
+#define COLOR_INIT_BG 0xFFFFFF   //init background gold (255, 215, 0)
 //0xFFD700
 int Brck_Pos[BRICKS_COUNT][4];
 int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
@@ -110,6 +110,19 @@ void draw_arrow_settings(){
 	}
 }
 
+void drawImage(int x, int y, int width, int height, uint16_t image[height][width]) {
+    int i, j;
+    setXY(x, y, x + width - 1, y + height - 1);
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            uint16_t color = image[i][j];
+            LCD_Write_DATA(color >> 8);
+            LCD_Write_DATA(color & 0xFF);
+        }
+    }
+    clrXY();
+}
+
 void dspl_init(){
 	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
 	DisplText("Welcome to ez game"  , 1,220,0,  BigFont);
@@ -118,11 +131,18 @@ void dspl_init(){
 	DisplText("START GAME"	        , 1,140,80, SmallFont);
 	DisplText("Settings"            , 1,120,80, SmallFont);
 	draw_arrow_init();
+	drawImage(10, 20, IMG_WIDTH, IMG_HEIGHT, image2);
+	drawImage(10, 250, IMG_WIDTH, IMG_HEIGHT, image);
 }
 void DisplInt(int a, int rotated,int x,int y,u8* font){
 	char buffer[16];
 	sprintf(buffer, "%d", a);
 	DisplText(buffer,rotated,x,y,font);
+}
+void DisplIntEnd(int a, int rotated,int x,int y,u8* font){
+	char buffer[16];
+	sprintf(buffer, "%d", a);
+	DisplTextEnd(buffer,rotated,x,y,font);
 }
 void dspl_Settings(){
 	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
@@ -147,6 +167,7 @@ void dspl_Br_Bo(){
 		DisplSelectedText("Board" , 1,180,250, SmallFont);
 	}
 }
+
 void Game_Init() {
 	init_ball_pixel_counts();
 	Init_Bricks();
@@ -231,8 +252,8 @@ void btn_mov_r() {
 }
 
 void DisplText(char *s1, int rotated,int x,int y,u8* font) {
-    setColor(0, 255, 0);
-    setColorBg(0, 0, 255);
+    setColor(0, 0, 0);
+    setColorBg(255, 255, 255);
     setFont(font);               //SmallFont/BigFont/SevenSegNumFont
     if (rotated) {
         lcdPrintRotated(s1, x, y);
@@ -240,6 +261,17 @@ void DisplText(char *s1, int rotated,int x,int y,u8* font) {
         lcdPrint(s1, 75, 140);
     }
 }
+void DisplTextEnd(char *s1, int rotated,int x,int y,u8* font) {
+    setColor(0, 255, 0);
+    setColorBg(34, 139, 34);
+    setFont(font);               //SmallFont/BigFont/SevenSegNumFont
+    if (rotated) {
+        lcdPrintRotated(s1, x, y);
+    } else {
+        lcdPrint(s1, 75, 140);
+    }
+}
+
 void DisplSelectedText(char *s1, int rotated,int x,int y,u8* font) {
     setColor(0, 255, 0);
     setColorBg(255, 0, 0);
@@ -253,8 +285,9 @@ void DisplSelectedText(char *s1, int rotated,int x,int y,u8* font) {
 
 void dspl_end(){
     //end frame
-	DisplText("Game Over"							, 1,140,90,  BigFont);
-	DisplText("your score is"						, 1,100,90, SmallFont);
-	DisplInt(score									, 1,100,220, SmallFont);
-	DisplText("press OK button to start new game"	, 1,80,30, SmallFont);
+	DisplTextEnd("Game Over"							, 1,140,90,  BigFont);
+	DisplTextEnd("your score is"						, 1,100,90, SmallFont);
+	DisplIntEnd(score									, 1,100,220, SmallFont);
+	DisplTextEnd("press OK button to start new game"	, 1,80,30, SmallFont);
+	drawImage(150, 130, IMG_WIDTH, IMG_HEIGHT, image_end);
 }
