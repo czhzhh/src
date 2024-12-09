@@ -26,6 +26,8 @@ void Game_Init();
 void dspl_end();
 void draw_arrow_init();
 void draw_arrow_settings();
+void DisplInt(int a, int rotated,int x,int y,u8* font);
+void dspl_Br_Bo();
 
 #define BRICKS_COUNT 16
 

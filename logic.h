@@ -2,6 +2,7 @@
 #define LOGIC_H
 
 #define MAX_RADIUS 20
+#define MAX_VELOCITIES 5
 
 typedef struct {
     int x;
@@ -18,12 +19,21 @@ typedef struct {
     int y_max;
 } Boarder;
 
-// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+typedef struct {
+    int vx[MAX_VELOCITIES];
+    int vy[MAX_VELOCITIES];
+    int current_index;  // µ±Ç°Ê¹ÓÃµÄË÷Òý
+} VelocityArray;
+
+
 void initBall(Ball *ball, int x, int y, int vx, int vy, int radius);
 void set_boarder(Ball *ball, Boarder *Boarder);
 void updateBall(Ball *ball, Boarder *Boarder);
-void upbtn_setting_change(Ball *ball, int moving_step);
-void downbtn_setting_change(Ball *ball, int moving_step);
+void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity);
+void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity);
 int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score);
-void regenerateSpeed(int *vx, int *vy);
+void generateSpeed(int *vx, int *vy);
+void init_vel(int initial_v);
+void updateBallSpeed(Ball* ball);
+void init_velocities(int initial_v);
 #endif // LOGIC_H

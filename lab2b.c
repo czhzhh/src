@@ -21,7 +21,6 @@ typedef struct Lab2BTag  {               //Lab2B State machine
 
  volatile int d=0;
 
-
 int currentMode = 1;
 int initPlotVar = 0;
 int setChangeFlag = 0;
@@ -55,6 +54,7 @@ QState fsm_on_start(Lab2B *me) {
             int vx = 6;
             int vy = 8;
             initBall(&ball, 220, 160, vx, vy, 5);
+    		updateBallSpeed(&ball);
             return Q_HANDLED();
         }
         case TICK_SIG: {
@@ -74,6 +74,8 @@ QState fsm_on_start(Lab2B *me) {
         }
         case GameOn: {
             xil_printf("game on\n\r");
+            init_velocities(bullet_velocity);
+            updateBallSpeed(&ball);
             if(initPlotVar == 0){
                 if(currentMode){
                 	Game_Init();
@@ -133,13 +135,11 @@ QState fsm_Setting(Lab2B *me) {
             return Q_TRAN(&fsm_on_start);
         }
         case B_L: {
-            // change paras according to setChangeFlag
-            downbtn_setting_change(&ball, moving_step);
+            downbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity);
 			return Q_HANDLED();
 		}
         case B_R: {
-            // change paras according to setChangeFlag
-            upbtn_setting_change(&ball, moving_step);
+            upbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity);
 			return Q_HANDLED();
 		}
         case BoardsChange: {
@@ -161,10 +161,10 @@ QState fsm_SW(Lab2B *me) {
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
 				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
-					//return Q_TRAN(&fsm_over);
+					return Q_TRAN(&fsm_over);
 				}
 				score += 5*(6-count);
-				regenerateSpeed(&ball.vx, &ball.vy);
+	    		updateBallSpeed(&ball);
 				xil_printf("ball vx in SW%d",ball.vx);
 			}
             update();
@@ -209,8 +209,8 @@ QState fsm_Btn(Lab2B *me) {
         		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
 					return Q_TRAN(&fsm_over);
 				}
+        		updateBallSpeed(&ball);
         		score += 10;
-        		regenerateSpeed(&ball.vx, &ball.vy);
         	}
             update();
 			return Q_HANDLED();
