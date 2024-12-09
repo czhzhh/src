@@ -41,7 +41,7 @@ int y_bias = 120;
 int now_yleft;
 int MAX_POS = 199;
 int moving_step = 20;
-int bullet_velocity = 5;
+int bullet_velocity = 15;
 int score = 0;
 Ball ball;
 Boarder boarder;
@@ -127,12 +127,25 @@ void DisplInt(int a, int rotated,int x,int y,u8* font){
 void dspl_Settings(){
 	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
 	DisplText("Settings"            , 1,220,0,  BigFont);
-	DisplText("Game mode"           , 1,180,60, SmallFont);	 DisplText("Bricks/Board"     , 1,180,200, SmallFont);
+	DisplText("Game mode"           , 1,180,60, SmallFont);	 dspl_Br_Bo();
 	DisplText("Bricks(max 8)"       , 1,160,60, SmallFont);	 DisplInt(valid_sw               , 1,160,200, SmallFont);
 	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,140,200, SmallFont);
 	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,120,200, SmallFont);
 	DisplText("Board Velocity"      , 1,100,60, SmallFont);  DisplInt(moving_step            , 1,100,200, SmallFont);
 	draw_arrow_settings();
+}
+
+void dspl_Br_Bo(){
+	if(currentMode==1){
+		//Bricks
+		DisplSelectedText("Bricks", 1,180,200, SmallFont);
+		DisplText(        "Board" , 1,180,250, SmallFont);
+	}
+	else if(currentMode==0) {
+		//Board
+		DisplText(        "Bricks", 1,180,200, SmallFont);
+		DisplSelectedText("Board" , 1,180,250, SmallFont);
+	}
 }
 void Game_Init() {
 	init_ball_pixel_counts();
@@ -220,6 +233,16 @@ void btn_mov_r() {
 void DisplText(char *s1, int rotated,int x,int y,u8* font) {
     setColor(0, 255, 0);
     setColorBg(0, 0, 255);
+    setFont(font);               //SmallFont/BigFont/SevenSegNumFont
+    if (rotated) {
+        lcdPrintRotated(s1, x, y);
+    } else {
+        lcdPrint(s1, 75, 140);
+    }
+}
+void DisplSelectedText(char *s1, int rotated,int x,int y,u8* font) {
+    setColor(0, 255, 0);
+    setColorBg(255, 0, 0);
     setFont(font);               //SmallFont/BigFont/SevenSegNumFont
     if (rotated) {
         lcdPrintRotated(s1, x, y);
