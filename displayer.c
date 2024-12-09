@@ -155,7 +155,6 @@ void dspl_Settings(){
 	draw_arrow_settings();
 }
 
-<<<<<<< HEAD
 void dspl_Br_Bo(){
 	if(currentMode==1){
 		//Bricks
@@ -168,8 +167,7 @@ void dspl_Br_Bo(){
 		DisplSelectedText("Board" , 1,180,250, SmallFont);
 	}
 }
-=======
->>>>>>> 6d22a6f (changed display)
+
 void Game_Init() {
 	init_ball_pixel_counts();
 	Init_Bricks();
@@ -273,7 +271,7 @@ void DisplTextEnd(char *s1, int rotated,int x,int y,u8* font) {
         lcdPrint(s1, 75, 140);
     }
 }
-<<<<<<< HEAD
+
 void DisplSelectedText(char *s1, int rotated,int x,int y,u8* font) {
     setColor(0, 255, 0);
     setColorBg(255, 0, 0);
@@ -285,8 +283,6 @@ void DisplSelectedText(char *s1, int rotated,int x,int y,u8* font) {
     }
 }
 
-=======
->>>>>>> 6d22a6f (changed display)
 void dspl_end(){
     //end frame
 	DisplTextEnd("Game Over"							, 1,140,90,  BigFont);
