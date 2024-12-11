@@ -22,7 +22,7 @@
 
 #define BRICK_HEIGHT 18
 #define BRICK_GAP 1
-#define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP) // ÿש��ռ�õ��ܸ߶�
+#define BRICK_TOTAL_HEIGHT (BRICK_HEIGHT + 2 * BRICK_GAP)
 #define BRICK_WIDTH 8
 #define SCREEN_HEIGHT 319
 #define BAR_WIDTH 8
@@ -36,10 +36,8 @@ int ball_pixel_counts[MAX_RADIUS + 1][2 * MAX_RADIUS + 1];
 int former_x=0;
 int former_y=0;
 extern int d;
-int init_yleft = 100;
 int y_bias = 120;
 int now_yleft;
-int MAX_POS = 199;
 int moving_step = 20;
 int bullet_velocity = 15;
 int score = 0;
@@ -92,7 +90,7 @@ void draw_arrow_init(){
 	}
 }
 void draw_arrow_settings(){
-	fillRectColor(COLOR_INIT_BG, 80, 40, 180, 55);
+	fillRectColor(COLOR_INIT_BG, 60, 40, 180, 55);
 	if(setChangeFlag==0){
 		DisplText("->"              ,1,180,40,  SmallFont);
 	}
@@ -107,6 +105,9 @@ void draw_arrow_settings(){
 	}
 	else if(setChangeFlag==4){
 		DisplText("->"              ,1,100,40,  SmallFont);
+	}
+	else if(setChangeFlag==5){
+		DisplText("->"              ,1, 80,40,  SmallFont);
 	}
 }
 
@@ -152,6 +153,7 @@ void dspl_Settings(){
 	DisplText("Bullet size"         , 1,140,60, SmallFont);  DisplInt(ball.radius            , 1,140,200, SmallFont);
 	DisplText("Bullet Velocity"     , 1,120,60, SmallFont);  DisplInt(bullet_velocity        , 1,120,200, SmallFont);
 	DisplText("Board Velocity"      , 1,100,60, SmallFont);  DisplInt(moving_step            , 1,100,200, SmallFont);
+	DisplText("Board Length"        , 1, 80,60, SmallFont);  DisplInt(y_bias                 , 1, 80,200, SmallFont);
 	draw_arrow_settings();
 }
 
@@ -223,7 +225,7 @@ void update(){
 
 
 void btn_init_game() {
-    now_yleft = init_yleft;
+    now_yleft = (int)(0.5*(SCREEN_HEIGHT-y_bias));
     fillRectColor(COLOR_BAR, 0, now_yleft, BAR_WIDTH, now_yleft + y_bias);
 }
 
@@ -240,10 +242,11 @@ void btn_mov_l() {
 }
 
 void btn_mov_r() {
-    if (now_yleft + moving_step >= MAX_POS) {
+	int max_pos = SCREEN_HEIGHT-y_bias;
+    if (now_yleft + moving_step >= max_pos) {
         fillRectColor(COLOR_BG, 0, SCREEN_HEIGHT - 2 * y_bias, BAR_WIDTH, SCREEN_HEIGHT - y_bias);
-        fillRectColor(COLOR_BAR, 0, MAX_POS, BAR_WIDTH, SCREEN_HEIGHT);
-        now_yleft = MAX_POS;
+        fillRectColor(COLOR_BAR, 0, max_pos, BAR_WIDTH, SCREEN_HEIGHT);
+        now_yleft = max_pos;
     } else {
         fillRectColor(COLOR_BG, 0, now_yleft, BAR_WIDTH, now_yleft + moving_step);
         now_yleft += moving_step;
