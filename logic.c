@@ -58,7 +58,7 @@ void updateBall(Ball *ball, Boarder *Boarder) {
     }
 }
 
-void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity){
+void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias){
 	if(setChangeFlag==0){
 		*currentMode = (*currentMode == 0) ? 1 : 0;//board
 		printf("%d",*currentMode);
@@ -81,12 +81,16 @@ void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bul
 		DisplText("   "          , 1,100,200, SmallFont);
 		DisplInt(*moving_step    , 1,100,200, SmallFont);
 	}
+	else if(setChangeFlag==5){
+		*y_bias=(*y_bias==200) ? 200 : *y_bias+10;
+		DisplText("    "         , 1, 80,200, SmallFont);
+		DisplInt(*y_bias         , 1, 80,200, SmallFont);
+	}
 }
 
-void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity){
+void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias){
 	if(setChangeFlag==0){
 		*currentMode = (*currentMode == 0) ? 1 : 0;//board
-		printf("%d",currentMode);
 		dspl_Br_Bo();
 	}
 	else if(setChangeFlag==1){
@@ -105,6 +109,11 @@ void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *b
 		*moving_step=(*moving_step==5) ? 5 : *moving_step-1;
 		DisplText("   "          , 1,100,200, SmallFont);
 		DisplInt(*moving_step    , 1,100,200, SmallFont);
+	}
+	else if(setChangeFlag==5){
+		*y_bias=(*y_bias==20) ? 20 : *y_bias-10;
+		DisplText("    "         , 1, 80,200, SmallFont);
+		DisplInt(*y_bias         , 1, 80,200, SmallFont);
 	}
 }
 

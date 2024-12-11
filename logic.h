@@ -29,8 +29,8 @@ typedef struct {
 void initBall(Ball *ball, int x, int y, int vx, int vy, int radius);
 void set_boarder(Ball *ball, Boarder *Boarder);
 void updateBall(Ball *ball, Boarder *Boarder);
-void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity);
-void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity);
+void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias);
+void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias);
 int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score);
 void generateSpeed(int *vx, int *vy);
 void init_vel(int initial_v);

@@ -119,13 +119,13 @@ QState fsm_Setting(Lab2B *me) {
         }
         case ChangeLevelUp: {
             xil_printf("change mode up\n\r");
-            setChangeFlag = (setChangeFlag == 0) ? 4 : setChangeFlag - 1;
+            setChangeFlag = (setChangeFlag == 0) ? 5 : setChangeFlag - 1;
             draw_arrow_settings();
             return Q_HANDLED();
         }
         case ChangeLevelDown: {
             xil_printf("change mode down\n\r");
-            setChangeFlag = (setChangeFlag == 4) ? 0 : setChangeFlag + 1;
+            setChangeFlag = (setChangeFlag == 5) ? 0 : setChangeFlag + 1;
             draw_arrow_settings();
             return Q_HANDLED();
         }
@@ -135,11 +135,11 @@ QState fsm_Setting(Lab2B *me) {
             return Q_TRAN(&fsm_on_start);
         }
         case B_L: {
-            downbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity);
+            downbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity,&y_bias);
 			return Q_HANDLED();
 		}
         case B_R: {
-            upbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity);
+            upbtn_setting_change(&currentMode,&ball, &moving_step,&bullet_velocity,&y_bias);
 			return Q_HANDLED();
 		}
         case BoardsChange: {

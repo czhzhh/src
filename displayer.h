@@ -40,4 +40,5 @@ extern int now_yleft;
 extern int init_yleft;
 extern int score;
 extern Boarder boarder;
+extern int y_bias;
 #endif
