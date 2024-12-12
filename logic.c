@@ -117,16 +117,16 @@ void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *b
 	}
 }
 
-int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score) {
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score, int ball_radius) {
     if (!currentMode) {
     	// score updated in lab2b.c
-        return (currentPositionY >= now_yleft && currentPositionY <= now_yleft + y_bias) ? 0 : 1;
+        return (currentPositionY >= (now_yleft - ball_radius) && currentPositionY <= (now_yleft + y_bias + ball_radius)) ? 0 : 1;
     } else {
         int returnValue = 1;
         if (count > 0) {
 			for (int i = 0; i < count; i++) {
 				int index = positions[i];
-				if (currentPositionY >= Brck_Pos[index][1] && currentPositionY <= Brck_Pos[index][3]) {
+				if (currentPositionY >= (Brck_Pos[index][1]- ball_radius) && currentPositionY <= (Brck_Pos[index][3]+ball_radius)) {
 					returnValue = 0;
 					break;
 				}

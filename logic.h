@@ -22,7 +22,7 @@ typedef struct {
 typedef struct {
     int vx[MAX_VELOCITIES];
     int vy[MAX_VELOCITIES];
-    int current_index;  // µ±Ç°Ê¹ÓÃµÄË÷Òý
+    int current_index;  // ï¿½ï¿½Ç°Ê¹ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½
 } VelocityArray;
 
 
@@ -31,7 +31,7 @@ void set_boarder(Ball *ball, Boarder *Boarder);
 void updateBall(Ball *ball, Boarder *Boarder);
 void upbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias);
 void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *bullet_velocity, int *y_bias);
-int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score);
+int calculateReflect(int currentPositionY, int now_yleft, int y_bias, int Brck_Pos[][4], int BRICKS_COUNT, int currentMode, int score, int ball_radius);
 void generateSpeed(int *vx, int *vy);
 void init_vel(int initial_v);
 void updateBallSpeed(Ball* ball);

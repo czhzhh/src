@@ -156,11 +156,12 @@ QState fsm_SW(Lab2B *me) {
 	    switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_SW\n\r");
+        	Bricks(count,positions);
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
+				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score, ball.radius)){
 					return Q_TRAN(&fsm_over);
 				}
 				score += 5*(6-count);
@@ -206,7 +207,7 @@ QState fsm_Btn(Lab2B *me) {
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
+        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score, ball.radius)){
 					return Q_TRAN(&fsm_over);
 				}
         		updateBallSpeed(&ball);
