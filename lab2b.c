@@ -156,15 +156,19 @@ QState fsm_SW(Lab2B *me) {
 	    switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_SW\n\r");
+        	Bricks(count,positions);
+        	//init_random_obstacles();
+        	//dspl_random_obstacles();
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
+				if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score, ball.radius)){
 					return Q_TRAN(&fsm_over);
 				}
 				score += 5*(6-count);
 	    		updateBallSpeed(&ball);
+	    		dspl_random_obstacles();
 				xil_printf("ball vx in SW%d",ball.vx);
 			}
             update();
@@ -206,11 +210,12 @@ QState fsm_Btn(Lab2B *me) {
 		}
         case TICK_SIG: {
         	if(ball.x <= boarder.x_min){
-        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score)){
+        		if(calculateReflect(ball.y, now_yleft, y_bias, Brck_Pos, valid_sw, currentMode, score, ball.radius)){
 					return Q_TRAN(&fsm_over);
 				}
         		updateBallSpeed(&ball);
         		score += 10;
+        		dspl_random_obstacles();
         	}
             update();
 			return Q_HANDLED();
@@ -252,9 +257,9 @@ QState fsm_over(Lab2B *me) {
         case GameOn: {
         	clrScr();
         	score = 0;
-        	int vx = 6;
-        	int vy = 8;
-        	initBall(&ball, 220, 160, vx, vy, 5);
+//        	int vx = 6;
+//        	int vy = 8;
+        	initBall(&ball, 220, 160, ball.vx, ball.vy, ball.radius);
         	dspl_init();
             return Q_TRAN(&fsm_on_start);
         }

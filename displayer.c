@@ -17,6 +17,7 @@
 #include "lcd.h"
 #include "logic.h"
 #include "image.h"
+#include <stdlib.h>
 
 #define MAX_RADIUS 20
 
@@ -43,6 +44,7 @@ int bullet_velocity = 15;
 int score = 0;
 Ball ball;
 Boarder boarder;
+int displayObstacleNum = 0;
 
 
 void fillRectColor(uint32_t color, int x1, int y1, int x2, int y2) {
@@ -297,4 +299,46 @@ void dspl_end(){
 	DisplIntEnd(score									, 1,100,220, SmallFont);
 	DisplTextEnd("press OK button to start new game"	, 1,80,30, SmallFont);
 	drawImage(150, 130, IMG_WIDTH, IMG_HEIGHT, image_end);
+}
+
+void dspl_random_bricks(){
+    //end frame
+	DisplTextEnd("Game Over"							, 1,140,90,  BigFont);
+	DisplTextEnd("your score is"						, 1,100,90, SmallFont);
+	DisplIntEnd(score									, 1,100,220, SmallFont);
+	DisplTextEnd("press OK button to start new game"	, 1,80,30, SmallFont);
+	drawImage(150, 130, IMG_WIDTH, IMG_HEIGHT, image_end);
+}
+
+void init_random_obstacles(){
+	int seed[10] = {160,45,
+				120,95,
+				160,145,
+				120,195,
+				160,245};
+	for(int i=0; i<5;i++){
+		randomObstacles[i].x_min =  seed[2*i];
+		randomObstacles[i].x_max =  randomObstacles[i].x_min+30;
+		randomObstacles[i].y_min =  seed[2*i+1] ;
+		randomObstacles[i].y_max =  randomObstacles[i].y_min+30;
+		randomObstacles[i].enable = 0;
+	}
+}
+
+void dspl_random_obstacles(){
+	for(int i=0; i<5;i++){
+		randomObstacles[i].enable = 0;
+	}
+	for(int i=0; i<3;i++){
+		randomObstacles[i+displayObstacleNum].enable = 1;
+		fillRectColor(COLOR_BAR, randomObstacles[i+displayObstacleNum].x_min, randomObstacles[i+displayObstacleNum].y_min,
+				randomObstacles[i+displayObstacleNum].x_max, randomObstacles[i+displayObstacleNum].y_max);
+	}
+	for(int i=0; i<5;i++){
+			if(randomObstacles[i].enable != 1){
+				fillRectColor(COLOR_BG, randomObstacles[i].x_min, randomObstacles[i].y_min,
+									randomObstacles[i].x_max, randomObstacles[i].y_max);
+			}
+		}
+	displayObstacleNum = (displayObstacleNum==2)? 0:displayObstacleNum+1;
 }
