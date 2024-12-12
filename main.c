@@ -5,12 +5,8 @@
 #include "qpn_port.h"
 #include "bsp.h"
 #include "complex.h"
-#include "fft.h"
 #include "lab2b.h"
 #include "lcd.h"
-#include "my_rand.h"
-#include "sevenSeg_new.h"
-#include "trig.h"
 #include "logic.h"
 #include "dspl_upd.h"
 
