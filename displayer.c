@@ -89,6 +89,7 @@ void draw_arrow_init(){
 		DisplText("->"              ,1,120,60,  SmallFont);
 	}
 }
+
 void draw_arrow_settings(){
 	fillRectColor(COLOR_INIT_BG, 60, 40, 180, 55);
 	if(setChangeFlag==0){
@@ -135,16 +136,19 @@ void dspl_init(){
 	drawImage(10, 20, IMG_WIDTH, IMG_HEIGHT, image2);
 	drawImage(10, 250, IMG_WIDTH, IMG_HEIGHT, image);
 }
+
 void DisplInt(int a, int rotated,int x,int y,u8* font){
 	char buffer[16];
 	sprintf(buffer, "%d", a);
 	DisplText(buffer,rotated,x,y,font);
 }
+
 void DisplIntEnd(int a, int rotated,int x,int y,u8* font){
 	char buffer[16];
 	sprintf(buffer, "%d", a);
 	DisplTextEnd(buffer,rotated,x,y,font);
 }
+
 void dspl_Settings(){
 	fillRectColor(COLOR_INIT_BG, 0, 0, 239, 319);
 	DisplText("Settings"            , 1,220,0,  BigFont);
@@ -218,11 +222,10 @@ void Score(){
 }
 
 void update(){
-	erase_former(former_x,former_y,8);
+	erase_former(former_x,former_y,ball.radius);
     updateBall(&ball, &boarder);
     draw_ball(&ball);
 }
-
 
 void btn_init_game() {
     now_yleft = (int)(0.5*(SCREEN_HEIGHT-y_bias));
@@ -264,6 +267,7 @@ void DisplText(char *s1, int rotated,int x,int y,u8* font) {
         lcdPrint(s1, 75, 140);
     }
 }
+
 void DisplTextEnd(char *s1, int rotated,int x,int y,u8* font) {
     setColor(0, 255, 0);
     setColorBg(34, 139, 34);

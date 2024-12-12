@@ -38,6 +38,7 @@ void set_boarder(Ball *ball, Boarder *Boarder){
 	Boarder->y_min=    ball->radius;
 	Boarder->y_max=319-ball->radius;
 }
+
 void updateBall(Ball *ball, Boarder *Boarder) {
 
     ball->x += ball->vx;
