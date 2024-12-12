@@ -17,12 +17,13 @@
 #include <stdio.h>
 #include "logic.h"
 #include "lab2b.h"
+#include <float.h>
 
-#define MAX_RADIUS 20
+#define MAX_RADIUS 10
 #define MAX_V 30
 #define MIN_V 10
 VelocityArray vel_array = {0};
-
+Obstacle randomObstacles[5];
 void initBall(Ball *ball, int x, int y, int vx, int vy, int radius) {
 	if (radius < 1 || radius > MAX_RADIUS) return; //check the validation of r
     ball->x = x;
@@ -38,11 +39,103 @@ void set_boarder(Ball *ball, Boarder *Boarder){
 	Boarder->y_min=    ball->radius;
 	Boarder->y_max=319-ball->radius;
 }
+
+int is_between(double value, double bound1, double bound2) {
+    double min = (bound1 < bound2) ? bound1 : bound2;
+    double max = (bound1 > bound2) ? bound1 : bound2;
+    return (value >= min && value <= max);
+}
+
+
+void get_intersection(Ball *ball,int p1_x, int p1_y, int p2_x, int p2_y, int x_min, int x_max, int y_min, int y_max) {
+    // Calculate the direction vector of the line
+    double dx = p2_x - p1_x;
+    double dy = p2_y - p1_y;
+
+    // Intersection points
+    double x_intersect = 0, y_intersect = 0;
+    double t_min = DBL_MAX;
+
+    // Check left edge intersection
+    if (dx != 0) {
+        double t_left = (x_min - p1_x) / dx;
+        if (t_left >= 0 && t_left <= 1) {
+            y_intersect = p1_y + t_left * dy;
+            if (is_between(y_intersect, y_min, y_max)) {
+                if (t_left < t_min) {
+                    t_min = t_left;
+                    ball->vx = -ball->vx;
+                    xil_printf("xmin\r\n");
+                    x_intersect = x_min;
+                }
+            }
+        }
+    }
+
+    // Check right edge intersection
+    if (dx != 0) {
+        double t_right = (x_max - p1_x) / dx;
+        if (t_right >= 0 && t_right <= 1) {
+            y_intersect = p1_y + t_right * dy;
+            if (is_between(y_intersect, y_min, y_max)) {
+                if (t_right < t_min) {
+                    t_min = t_right;
+                    ball->vx = -ball->vx;
+                    xil_printf("xmax\r\n");
+                    x_intersect = x_max;
+                }
+            }
+        }
+    }
+
+    // Check bottom edge intersection
+    if (dy != 0) {
+        double t_bottom = (y_min - p1_y) / dy;
+        if (t_bottom >= 0 && t_bottom <= 1) {
+            x_intersect = p1_x + t_bottom * dx;
+            if (is_between(x_intersect, x_min, x_max)) {
+                if (t_bottom < t_min) {
+                    t_min = t_bottom;
+                    ball->vy = -ball->vy;
+                    xil_printf("ymin\r\n");
+                    y_intersect = y_min;
+                }
+            }
+        }
+    }
+
+    // Check top edge intersection
+    if (dy != 0) {
+        double t_top = (y_max - p1_y) / dy;
+        if (t_top >= 0 && t_top <= 1) {
+            x_intersect = p1_x + t_top * dx;
+            if (is_between(x_intersect, x_min, x_max)) {
+                if (t_top < t_min) {
+                    t_min = t_top;
+                    ball->vy = -ball->vy;
+                    xil_printf("ymax\r\n");
+                    y_intersect = y_max;
+                }
+            }
+        }
+    }
+}
+
 void updateBall(Ball *ball, Boarder *Boarder) {
 
     ball->x += ball->vx;
     ball->y += ball->vy;
-
+//    for (int i = 0; i < 5; i++) {
+//            if (randomObstacles[i].enable) {
+//                if (ball->x >= randomObstacles[i].x_min+ball->radius && ball->x <= randomObstacles[i].x_max+ball->radius
+//                		&& ball->y >= randomObstacles[i].y_min+ball->radius && ball->y <= randomObstacles[i].y_max+ball->radius) {
+//                	xil_printf("randomObstacles %d\r\n",i);
+//                	get_intersection(ball, ball->x- ball->vx, ball->y - ball->vy, ball->x, ball->y,
+//                			randomObstacles[i].x_min+ball->radius, randomObstacles[i].x_max+ball->radius
+//							, randomObstacles[i].y_min+ball->radius, randomObstacles[i].y_max+ball->radius);
+//                }
+//            }
+//        }
     if (ball->x <= Boarder->x_min) {
         ball->x = Boarder->x_min;
     } else if (ball->x >= Boarder->x_max) {
@@ -99,6 +192,7 @@ void downbtn_setting_change(int* currentMode,Ball *ball, int* moving_step,int *b
 	}
 	else if(setChangeFlag==2){
 		ball->radius=(ball->radius==3) ? 3 : ball->radius-1;
+		DisplText("    "         , 1, 140,200, SmallFont);
 		DisplInt(ball->radius  , 1,140,200, SmallFont);
 	}
 	else if(setChangeFlag==3){

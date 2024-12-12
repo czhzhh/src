@@ -41,4 +41,7 @@ extern int init_yleft;
 extern int score;
 extern Boarder boarder;
 extern int y_bias;
+extern void init_random_obstacles();
+extern void dspl_random_obstacles();
+
 #endif

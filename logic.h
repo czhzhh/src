@@ -20,6 +20,14 @@ typedef struct {
 } Boarder;
 
 typedef struct {
+    int x_min;
+    int x_max;
+    int y_min;
+    int y_max;
+    int enable;
+} Obstacle;
+
+typedef struct {
     int vx[MAX_VELOCITIES];
     int vy[MAX_VELOCITIES];
     int current_index;  // ��ǰʹ�õ�����
@@ -36,4 +44,5 @@ void generateSpeed(int *vx, int *vy);
 void init_vel(int initial_v);
 void updateBallSpeed(Ball* ball);
 void init_velocities(int initial_v);
+extern Obstacle randomObstacles[5];
 #endif // LOGIC_H
