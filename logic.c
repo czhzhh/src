@@ -40,6 +40,7 @@ void set_boarder(Ball *ball, Boarder *Boarder){
 	Boarder->y_max=319-ball->radius;
 }
 
+
 int is_between(double value, double bound1, double bound2) {
     double min = (bound1 < bound2) ? bound1 : bound2;
     double max = (bound1 > bound2) ? bound1 : bound2;
