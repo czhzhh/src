@@ -157,8 +157,8 @@ QState fsm_SW(Lab2B *me) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_SW\n\r");
         	Bricks(count,positions);
-        	//init_random_obstacles();
-        	//dspl_random_obstacles();
+        	init_random_obstacles();
+        	dspl_random_obstacles();
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
@@ -206,6 +206,8 @@ QState fsm_Btn(Lab2B *me) {
 	    switch (Q_SIG(me)) {
         case Q_ENTRY_SIG: {
         	xil_printf("fsm_Btn\n\r");
+        	init_random_obstacles();
+        	dspl_random_obstacles();
 			return Q_HANDLED();
 		}
         case TICK_SIG: {
