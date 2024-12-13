@@ -67,6 +67,7 @@ void get_intersection(Ball *ball,int p1_x, int p1_y, int p2_x, int p2_y, int x_m
                     t_min = t_left;
                     ball->vx = -ball->vx;
                     xil_printf("xmin\r\n");
+                    ball->x =x_min;
                     x_intersect = x_min;
                 }
             }
@@ -83,6 +84,7 @@ void get_intersection(Ball *ball,int p1_x, int p1_y, int p2_x, int p2_y, int x_m
                     t_min = t_right;
                     ball->vx = -ball->vx;
                     xil_printf("xmax\r\n");
+                    ball->x =x_max;
                     x_intersect = x_max;
                 }
             }
@@ -99,6 +101,7 @@ void get_intersection(Ball *ball,int p1_x, int p1_y, int p2_x, int p2_y, int x_m
                     t_min = t_bottom;
                     ball->vy = -ball->vy;
                     xil_printf("ymin\r\n");
+                    ball->y =y_min;
                     y_intersect = y_min;
                 }
             }
@@ -115,6 +118,7 @@ void get_intersection(Ball *ball,int p1_x, int p1_y, int p2_x, int p2_y, int x_m
                     t_min = t_top;
                     ball->vy = -ball->vy;
                     xil_printf("ymax\r\n");
+                    ball->y =y_max;
                     y_intersect = y_max;
                 }
             }
@@ -126,17 +130,17 @@ void updateBall(Ball *ball, Boarder *Boarder) {
 
     ball->x += ball->vx;
     ball->y += ball->vy;
-//    for (int i = 0; i < 5; i++) {
-//            if (randomObstacles[i].enable) {
-//                if (ball->x >= randomObstacles[i].x_min+ball->radius && ball->x <= randomObstacles[i].x_max+ball->radius
-//                		&& ball->y >= randomObstacles[i].y_min+ball->radius && ball->y <= randomObstacles[i].y_max+ball->radius) {
-//                	xil_printf("randomObstacles %d\r\n",i);
-//                	get_intersection(ball, ball->x- ball->vx, ball->y - ball->vy, ball->x, ball->y,
-//                			randomObstacles[i].x_min+ball->radius, randomObstacles[i].x_max+ball->radius
-//							, randomObstacles[i].y_min+ball->radius, randomObstacles[i].y_max+ball->radius);
-//                }
-//            }
-//        }
+    for (int i = 0; i < 5; i++) {
+            if (randomObstacles[i].enable) {
+                if (ball->x >= randomObstacles[i].x_min-ball->radius && ball->x <= randomObstacles[i].x_max+ball->radius
+                		&& ball->y >= randomObstacles[i].y_min-ball->radius && ball->y <= randomObstacles[i].y_max+ball->radius) {
+                	xil_printf("randomObstacles %d\r\n",i);
+                	get_intersection(ball, ball->x- ball->vx, ball->y - ball->vy, ball->x, ball->y,
+                			randomObstacles[i].x_min-ball->radius, randomObstacles[i].x_max+ball->radius
+							, randomObstacles[i].y_min-ball->radius, randomObstacles[i].y_max+ball->radius);
+                }
+            }
+        }
     if (ball->x <= Boarder->x_min) {
         ball->x = Boarder->x_min;
     } else if (ball->x >= Boarder->x_max) {
